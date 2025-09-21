@@ -1,0 +1,146 @@
+/* app/globals.css - replace entire file with this exact content */
+
+/* === TAILWIND DIRECTIVES — MUST BE FIRST === */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Theme variables (paste your OKLCH tokens here) === */
+
+body {
+  @apply bg-gray-900 text-white;
+  background-image: radial-gradient(circle at top left, rgba(82, 82, 82, 0.05), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(114, 114, 114, 0.05), transparent 60%);
+  backdrop-filter: blur(4px);
+}
+:root {
+    --background: #f9faf9;              /* soft off-white with green tint */
+  --foreground: #98dead;              /* dark greenish-gray for text */
+
+   --card: #caf273f6;
+  --card-foreground: #1a2b1f;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.3 0 0);
+   --primary: #15803d;                 /* main green */
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.7 0.15 100);
+  --secondary-foreground: oklch(0.3 0 0);
+  --muted: oklch(0.98 0.02 142);
+  --muted-foreground: oklch(0.5 0 0);
+ --accent: #84cc16;
+  --accent-foreground: #1a2b1f;
+  --destructive: oklch(0.5 0.2 15);
+  --destructive-foreground: oklch(1 0 0);
+  --border: #e6efe9;
+   --input: #f1f8f3;
+  --ring: oklch(0.7 0.15 100);
+  --chart-1: oklch(0.45 0.15 142);
+  --chart-2: oklch(0.7 0.15 100);
+  --chart-3: oklch(0.65 0.2 35);
+  --chart-4: oklch(0.65 0.2 330);
+  --chart-5: oklch(0.5 0.2 15);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.98 0.02 142);
+  --sidebar-foreground: oklch(0.3 0 0);
+  --sidebar-primary: oklch(0.45 0.15 142);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.7 0.15 100);
+  --sidebar-accent-foreground: oklch(0.3 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.7 0.15 100);
+  --muted: #f1f8f3;                   /* pale green background for subtle sections */
+  --muted-foreground: #4b5563;
+}
+
+.dark {
+  --background: oklch(39.889% 0.00133 15.33);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.15 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.1 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.55 0.15 142);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.2 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.7 0.15 100);
+  --accent-foreground: oklch(0.1 0 0);
+  --destructive: oklch(0.5 0.2 15);
+  --destructive-foreground: oklch(0.95 0 0);
+  --border: oklch(0.2 0 0);
+  --input: oklch(0.2 0 0);
+  --ring: oklch(0.7 0.15 100);
+  --chart-1: oklch(0.55 0.15 142);
+  --chart-2: oklch(0.7 0.15 100);
+  --chart-3: oklch(0.65 0.2 35);
+  --chart-4: oklch(0.65 0.2 330);
+  --chart-5: oklch(0.5 0.2 15);
+  --sidebar: oklch(0.15 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.55 0.15 142);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+  --sidebar-ring: oklch(0.7 0.15 100);
+}
+
+/* Optional mapping block (you can keep/remove) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* --- SAFE base layer: avoid applying unknown utilities to * --- */
+@layer base {
+  :where(input, textarea, select, button) {
+    /* safe border */
+    @apply border border-border;
+  }
+
+  body {
+    /* use CSS variables for light greenish vibe */
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* 🎨 softer, lighter green-tinted pattern */
+    background-image: radial-gradient(circle at 15% 20%, rgba(112, 114, 112, 0.015), transparent 70%),
+                      radial-gradient(circle at 85% 80%, rgba(118, 119, 116, 0.02), transparent 80%);
+    background-attachment: fixed;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+}
+
+/* small custom components */
+@layer components {
+  .hf-card {
+    @apply bg-card text-card-foreground p-4 rounded-lg shadow-sm;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .hf-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(21,128,61,0.1);
+  }
+}
