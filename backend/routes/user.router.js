@@ -6,7 +6,9 @@ import {
   forgotPassword,
   verifyResetPasswordOtp,
   resendResetPasswordOtp,
+  getAllUsers
 } from "../controllers/user.controller.js";
+import { get } from "http";
 
 const router = express.Router();
 
@@ -21,5 +23,6 @@ router.post("/login", login);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-password-otp', verifyResetPasswordOtp);
 router.post('/resend-reset-password-otp', resendResetPasswordOtp);
+router.get('/', getAllUsers);
 
 export default router;

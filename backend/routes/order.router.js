@@ -1,6 +1,5 @@
-// routes/order.routes.js
 import express from 'express';
-import {protect} from '../middlewares/auth.middleware.js'; // your auth middleware
+import {protect} from '../middlewares/auth.middleware.js'; 
 
 import {
   createOrder,
@@ -25,6 +24,6 @@ router.get('/user/:userId', getOrdersByUserId);
 router.get('/:id', getOrderById);
 
 // Update order status
-router.patch('/:id', updateOrderStatus);
+router.put('/:id/status', updateOrderStatus);
 
 export default router;

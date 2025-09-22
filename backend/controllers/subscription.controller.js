@@ -156,4 +156,19 @@ export const calculateOneMonthExpiry = (startDate = new Date()) => {
   return endDate;
 };
 
-export { confirmSubscription };
+const getAllSubscriptions = async (req, res) => {
+  try {
+    const subscriptions = await Order.find().populate('userId', 'username email');
+    res.status(200).json(subscriptions);
+  }
+  catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch subscriptions',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+}
+
+export { confirmSubscription, getAllSubscriptions };

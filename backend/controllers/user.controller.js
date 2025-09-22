@@ -329,6 +329,14 @@ This is an automated message, please do not reply to this email.`
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password -otp -otpExpiry -resetPasswordOtp -resetPasswordOtpExpiry');
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Get all users error:", error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+}
 
-
-export { signup, verifyOtp, login, forgotPassword, verifyResetPasswordOtp, resendResetPasswordOtp };
+export { signup, verifyOtp, login, forgotPassword, verifyResetPasswordOtp, resendResetPasswordOtp, getAllUsers };

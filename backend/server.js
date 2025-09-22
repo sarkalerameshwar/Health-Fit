@@ -9,6 +9,9 @@ import orderRoutes from './routes/order.router.js';
 import subscriptionRoutes from './routes/subcription.router.js';
 import feedbackRoutes from './routes/feedback.router.js';
 import inquiryRoutes from './routes/inquiry.router.js';
+import upload from './routes/upload.router.js';
+
+
 
 dotenv.config();
 connectDB();
@@ -17,7 +20,12 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173', // your frontend origin
+  credentials: true,              // allow cookies/auth
+};
+
+app.use(cors(corsOptions));
 
 
 const PORT = process.env.PORT || 5000;
@@ -30,7 +38,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use("/api/feedback", feedbackRoutes);
-app.use('/api/inquiry', inquiryRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+
+app.use('/api/payments', upload);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -6,6 +6,10 @@ const inquirySchema = new mongoose.Schema({
     ref: "User", // reference to your User model
     required: true
     },
+    username: {
+    type: String,
+    required: true
+    },
     email: {
     type: String,
     required: true

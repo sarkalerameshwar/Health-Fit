@@ -8,6 +8,6 @@ const router = express.Router();
 router.post("/add", protect, addFeedback);
 
 // Admin sees all feedback
-router.get("/all", protect, getAllFeedback); // add admin middleware if needed
+router.get("/all", getAllFeedback); // add admin middleware if needed
 
 export default router;

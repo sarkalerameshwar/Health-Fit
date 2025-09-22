@@ -1,25 +1,16 @@
 import Inquiry from "../models/inquiry.model.js";
 
-// ✅ Add Inquiry (User sends message + optional rating)
+// Add Inquiry (User sends message + optional rating)
 export const addInquiry = async (req, res) => {
   try {
-    // logged-in user details from auth middleware
     const { _id: userId, username, email } = req.user;
-
-    const { subject, message, rating } = req.body; // extra info from frontend
+    const { subject, message, rating } = req.body;
 
     if (!message) {
       return res.status(400).json({ message: "Inquiry message is required" });
     }
 
-    const inquiry = new Inquiry({
-      userId,
-      username,
-      email,
-      subject,
-      message,
-    });
-
+    const inquiry = new Inquiry({ userId, username, email, subject, message });
     await inquiry.save();
 
     res.status(201).json({
@@ -36,7 +27,7 @@ export const addInquiry = async (req, res) => {
   }
 };
 
-// ✅ Get All Inquiries (Admin)
+// Get All Inquiries (Admin)
 export const getAllInquiry = async (req, res) => {
   try {
     const inquiryList = await Inquiry.find().sort({ createdAt: -1 });
@@ -54,7 +45,7 @@ export const getAllInquiry = async (req, res) => {
   }
 };
 
-// ✅ Get Inquiries by Logged-in User
+// Get Inquiries by Logged-in User
 export const getMyInquiry = async (req, res) => {
   try {
     const myInquiries = await Inquiry.find({ userId: req.user._id }).sort({ createdAt: -1 });
@@ -72,4 +63,17 @@ export const getMyInquiry = async (req, res) => {
   }
 };
 
-export default { addInquiry, getAllInquiry, getMyInquiry };
+// Update Inquiry Status
+export const updateInquiryStatus = async (inquiryId, newStatus) => {
+  try {
+    const inquiry = await Inquiry.findById(inquiryId);
+    if (!inquiry) {
+      return { success: false, error: 'Inquiry not found' };
+    }
+    inquiry.status = newStatus;
+    await inquiry.save();
+    return { success: true, inquiry };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
