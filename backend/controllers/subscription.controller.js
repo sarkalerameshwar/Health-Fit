@@ -5,23 +5,13 @@ import Order from '../models/order.model.js';
 
 const confirmSubscription = async (req, res) => {
   try {
-    const { orderId } = req.params;
+    // Get the order from req.order (set by verifyPayment middleware)
+    const order = req.order;
 
-    // Validate input
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order ID is required'
-      });
-    }
-
-    // Find the order (without updating it)
-    const order = await Order.findById(orderId).populate('userId', 'username email');
-    
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: 'Order not found - payment verification failed'
       });
     }
 
@@ -108,7 +98,6 @@ The HealthFit Team
 © ${new Date().getFullYear()} HealthFit. All rights reserved.
 This is an automated message, please do not reply to this email.`;
 
-    // Send confirmation email
     await sendEmail(
       user.email,
       emailSubject,

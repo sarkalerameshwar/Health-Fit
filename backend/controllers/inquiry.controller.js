@@ -10,19 +10,19 @@ export const addInquiry = async (req, res) => {
       return res.status(400).json({ message: "Inquiry message is required" });
     }
 
-    const inquiry = new Inquiry({ userId, username, email, subject, message });
+    const inquiry = new Inquiry({ userId, username , email, subject, message });
     await inquiry.save();
 
     res.status(201).json({
       success: true,
       message: "Inquiry submitted successfully!",
-      inquiry
+      inquiry,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Something went wrong",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -34,13 +34,13 @@ export const getAllInquiry = async (req, res) => {
     res.status(200).json({
       success: true,
       count: inquiryList.length,
-      inquiries: inquiryList
+      inquiries: inquiryList,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Failed to fetch inquiries",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -48,17 +48,19 @@ export const getAllInquiry = async (req, res) => {
 // Get Inquiries by Logged-in User
 export const getMyInquiry = async (req, res) => {
   try {
-    const myInquiries = await Inquiry.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    const myInquiries = await Inquiry.find({ userId: req.user._id }).sort({
+      createdAt: -1,
+    });
     res.status(200).json({
       success: true,
       count: myInquiries.length,
-      inquiries: myInquiries
+      inquiries: myInquiries,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Failed to fetch your inquiries",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -68,7 +70,7 @@ export const updateInquiryStatus = async (inquiryId, newStatus) => {
   try {
     const inquiry = await Inquiry.findById(inquiryId);
     if (!inquiry) {
-      return { success: false, error: 'Inquiry not found' };
+      return { success: false, error: "Inquiry not found" };
     }
     inquiry.status = newStatus;
     await inquiry.save();

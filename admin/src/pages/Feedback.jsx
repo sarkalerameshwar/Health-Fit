@@ -1,63 +1,79 @@
-import { useState, useEffect } from 'react';
-import Header from '../components/Layout/Header';
-import DataTable from '../components/DataTable';
+import { useState, useEffect } from "react";
+import Header from "../components/Layout/Header";
+import DataTable from "../components/DataTable";
 
 const Feedback = () => {
   const [feedback, setFeedback] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filterRating, setFilterRating] = useState('All');
+  const [search, setSearch] = useState("");
+  const [filterRating, setFilterRating] = useState("All");
+
+  const token = localStorage.getItem("adminToken");
 
   useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/feedback/all');
-        const data = await response.json();
-        setFeedback(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching feedback:', error);
-        setLoading(false);
-      }
-    };
-
     fetchFeedback();
   }, []);
 
+  const fetchFeedback = async () => {
+    if (!token) {
+      alert("You are not authenticated. Please login.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/feedback/all", {
+        headers: {
+          authorization: token, // plain token, no 'Bearer ' prefix
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      setFeedback(data.success ? data.data : []); // assuming backend sends { success, data }
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      alert("Failed to fetch feedback. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filtered + searched data
-  const filteredFeedback = feedback.filter(item => {
+  const filteredFeedback = feedback.filter((item) => {
     const matchesSearch =
       item.username.toLowerCase().includes(search.toLowerCase()) ||
       item.email.toLowerCase().includes(search.toLowerCase()) ||
       item.message.toLowerCase().includes(search.toLowerCase());
 
     const matchesRating =
-      filterRating === 'All' ? true : item.rating === parseInt(filterRating);
+      filterRating === "All" ? true : item.rating === parseInt(filterRating);
 
     return matchesSearch && matchesRating;
   });
 
   const columns = [
-    { header: 'Name', accessor: 'username' },
-    { header: 'Email', accessor: 'email' },
+    { header: "Name", accessor: "username" },
+    { header: "Email", accessor: "email" },
     {
-      header: 'Rating',
-      accessor: 'rating',
+      header: "Rating",
+      accessor: "rating",
       render: (item) => {
-        const stars = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+        const stars = "★".repeat(item.rating) + "☆".repeat(5 - item.rating);
         return <span className="text-yellow-400">{stars}</span>;
       },
     },
     {
-      header: 'Message',
-      accessor: 'message',
-      render: (item) => (
-        <div className="truncate max-w-xs">{item.message}</div>
-      ),
+      header: "Message",
+      accessor: "message",
+      render: (item) => <div className="truncate max-w-xs">{item.message}</div>,
     },
     {
-      header: 'Date',
-      accessor: 'createdAt',
+      header: "Date",
+      accessor: "createdAt",
       render: (item) => new Date(item.createdAt).toLocaleString(),
     },
   ];

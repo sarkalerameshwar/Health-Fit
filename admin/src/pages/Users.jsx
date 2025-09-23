@@ -1,7 +1,6 @@
-// pages/Users.jsx
-import { useState, useEffect } from 'react';
-import Header from '../components/Layout/Header';
-import DataTable from '../components/DataTable';
+import { useState, useEffect } from "react";
+import Header from "../components/Layout/Header";
+import DataTable from "../components/DataTable";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -10,16 +9,29 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // call your backend API
-        const response = await fetch('http://localhost:5000/api/user'); 
+        const token = localStorage.getItem("adminToken");
+        if (!token) throw new Error("No token found. Please login.");
+
+        const response = await fetch("http://localhost:5000/api/user", {
+          headers: {
+            authorization: token, // plain token, no 'Bearer ' prefix
+          },
+          credentials: "include",
+        });
+
         const data = await response.json();
+        console.log("Fetched users:", data);
 
-        console.log('Fetched users:', data); // log the fetched data
-
-        setUsers(data); // directly from backend
-        setLoading(false);
+        // assuming backend response: { success: true, data: [...] }
+        if (data.success && Array.isArray(data.data)) {
+          setUsers(data.data);
+        } else {
+          setUsers([]);
+        }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
+        setUsers([]);
+      } finally {
         setLoading(false);
       }
     };
@@ -29,23 +41,25 @@ const Users = () => {
 
   // show fields: name, email, verified status
   const columns = [
-    { header: 'Name', accessor: 'username' },
-    { header: 'Email', accessor: 'email' },
+    { header: "Name", accessor: "username" },
+    { header: "Email", accessor: "email" },
     {
-      header: 'Join Date',
-      accessor: 'date',
+      header: "Join Date",
+      accessor: "date",
       render: (item) => new Date(item.date).toLocaleDateString(),
     },
     {
-      header: 'Verified',
-      accessor: 'ifVerified',
+      header: "Verified",
+      accessor: "ifVerified",
       render: (item) => (
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
-            item.ifVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            item.ifVerified
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
           }`}
         >
-          {item.ifVerified ? 'Verified' : 'Not Verified'}
+          {item.ifVerified ? "Verified" : "Not Verified"}
         </span>
       ),
     },

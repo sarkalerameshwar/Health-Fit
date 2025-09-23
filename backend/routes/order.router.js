@@ -1,5 +1,6 @@
 import express from 'express';
 import {protect} from '../middlewares/auth.middleware.js'; 
+import admin from '../middlewares/admin.middleware.js';
 
 import {
   createOrder,
@@ -15,15 +16,15 @@ const router = express.Router();
 router.post('/create', protect, createOrder);
 
 // Get all orders with optional filtering
-router.get('/', getOrders);
+router.get('/', admin, getOrders);
 
 // Get orders by user ID
 router.get('/user/:userId', getOrdersByUserId);
 
 // Get single order by ID
-router.get('/:id', getOrderById);
+router.get('/:id', admin, getOrderById);
 
 // Update order status
-router.put('/:id/status', updateOrderStatus);
+router.put('/:id/status', admin, updateOrderStatus);
 
 export default router;

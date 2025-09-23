@@ -8,16 +8,23 @@ const Subscriptions = () => {
 
   const fetchOrders = async () => {
     try {
+      const token = localStorage.getItem("adminToken"); // get JWT token
+      if (!token) throw new Error("No token found. Please login.");
+
       const response = await fetch("http://localhost:5000/api/orders", {
+        headers: {
+          authorization: token, // plain token, no 'Bearer ' prefix
+        },
         credentials: "include",
       });
+
       const data = await response.json();
-      if (data.success) {
-        setOrders(data.data.orders); // get orders array
+      if (data.success && Array.isArray(data.data.orders)) {
+        setOrders(data.data.orders); // set orders array
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -52,7 +59,13 @@ const Subscriptions = () => {
               <td className="border px-4 py-2">{order.name}</td>
               <td className="border px-4 py-2">{order.plan}</td>
               <td className="border px-4 py-2">{order.paymentMethod}</td>
-              <td className={`border px-4 py-2 ${order.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'}`}>
+              <td
+                className={`border px-4 py-2 ${
+                  order.status === "confirmed"
+                    ? "text-green-600"
+                    : "text-yellow-600"
+                }`}
+              >
                 {order.status}
               </td>
             </tr>

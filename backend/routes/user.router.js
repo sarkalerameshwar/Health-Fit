@@ -9,6 +9,7 @@ import {
   getAllUsers
 } from "../controllers/user.controller.js";
 import { get } from "http";
+import admin from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
@@ -23,6 +24,6 @@ router.post("/login", login);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-password-otp', verifyResetPasswordOtp);
 router.post('/resend-reset-password-otp', resendResetPasswordOtp);
-router.get('/', getAllUsers);
+router.get('/',admin, getAllUsers);
 
 export default router;

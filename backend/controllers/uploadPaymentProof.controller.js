@@ -1,6 +1,7 @@
 import cloudinary from 'cloudinary';
 import Order from '../models/order.model.js';
 import streamifier from 'streamifier';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -18,9 +19,9 @@ export const uploadPaymentProof = async (req, res) => {
 
     // Validate required fields
     if (!orderId || !utrNumber || !req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing required fields (orderId, utrNumber, or screenshot)' 
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields (orderId, utrNumber, or screenshot)'
       });
     }
 
@@ -40,10 +41,15 @@ export const uploadPaymentProof = async (req, res) => {
 
     const result = await streamUpload(req.file.buffer);
 
-    // Find the order
-    const order = await Order.findOne({ _id: orderId, userId });
+    // ✅ FIX: only check orderId, then optionally check ownership
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Optional: ensure the logged-in user owns the order
+    if (order.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: 'You are not authorized to upload proof for this order' });
     }
 
     // Update order with payment proof
@@ -51,8 +57,6 @@ export const uploadPaymentProof = async (req, res) => {
     order.utrNumber = utrNumber;
     order.status = 'pending_verification';
     await order.save();
-
-
 
     res.status(200).json({
       success: true,
@@ -71,22 +75,74 @@ export const uploadPaymentProof = async (req, res) => {
 
 
 // admin function to verify payment
+
 export const verifyPayment = async (req, res, next) => {
   try {
     const { orderId } = req.params;
 
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    console.log('🔍 verifyPayment called with:');
+    console.log('- orderId from params:', orderId);
+    console.log('- req.params:', req.params);
+    console.log('- req.body:', req.body);
 
+    // ✅ Validate ObjectId format first
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      console.error('❌ Invalid orderId format:', orderId);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format',
+        providedOrderId: orderId
+      });
+    }
+
+    // ✅ Only check in Order collection
+    console.log('🔍 Searching for order in database...');
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      console.error('❌ Order not found in database:', orderId);
+      console.log('🔍 Available orders in database:');
+
+      // Debug: List recent orders to help identify the issue
+      const recentOrders = await Order.find({}).limit(5).select('_id status createdAt');
+      console.log('Recent orders:', recentOrders);
+
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+        providedOrderId: orderId,
+        availableOrders: recentOrders.map(o => ({ id: o._id, status: o.status }))
+      });
+    }
+
+    console.log('✅ Order found:', {
+      id: order._id,
+      status: order.status,
+      userId: order.userId,
+      paymentVerified: order.paymentVerified
+    });
+
+    // ✅ Mark payment verified (status update optional)
     order.paymentVerified = true;
-    order.status = 'confirmed';
+    order.status = 'confirmed'; // you can remove this if you only want paymentVerified=true
     await order.save();
 
-    req.order = order; // attach order to req for next middleware
-    next(); // proceed to confirmSubscription
+    console.log(`✅ Payment verified for Order ID: ${orderId}`);
+    console.log(`📋 Order status updated to: ${order.status}`);
+    console.log(`🔄 Proceeding to send confirmation email...`);
 
-    res.status(200).json({ success: true, message: 'Payment verified successfully', order });
+    // Attach order to req for next middleware
+    req.order = order;
+
+    // Hand over control to next middleware (e.g. confirmSubscription)
+    next();
+
   } catch (error) {
-    res.status(500).json({ message: 'Error verifying payment', error: error.message });
+    console.error('Error verifying payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying payment',
+      error: error.message
+    });
   }
 };

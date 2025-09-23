@@ -32,9 +32,16 @@ export const addFeedback = async (req, res) => {
 export const getAllFeedback = async (req, res) => {
   try {
     const feedbackList = await Feedback.find().sort({ createdAt: -1 });
-    res.status(200).json(feedbackList);
+    res.status(200).json({
+      success: true,
+      data: feedbackList
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch feedback", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch feedback",
+      error: error.message
+    });
   }
 };
 
