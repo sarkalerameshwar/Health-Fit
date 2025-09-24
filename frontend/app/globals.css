@@ -1,0 +1,196 @@
+/* app/globals.css - full replacement (greenish theme, slightly-colored background) */
+
+/* === TAILWIND DIRECTIVES — MUST BE FIRST === */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ensure full-height on root elements */
+html, body, #__next {
+  @apply min-h-screen;
+}
+
+/* === Theme variables (greenish, soft background) === */
+:root {
+  /* Page background (soft green tint, not pure white) */
+  --background: #f2faf2;       /* faint mint / off-white */
+
+  /* Primary text */
+  --foreground: #0f1720;       /* very dark slate for good contrast */
+
+  /* Card surfaces (distinct from background) */
+  --card: #ffffff;             /* white cards still look clean; we'll add subtle tint via box-shadow */
+  --card-foreground: #0f1720;
+
+  /* Popovers / elevated surfaces */
+  --popover: #ffffff;
+  --popover-foreground: #0f1720;
+
+  /* Brand / accents */
+  --primary: #15803d;          /* HealthFit green (primary) */
+  --primary-foreground: #ffffff;
+
+  --secondary: #60a5fa;        /* soft blue accent */
+  --secondary-foreground: #0f1720;
+
+  --accent: #34d399;           /* bright green highlight */
+  --accent-foreground: #0f1720;
+
+  /* Muted surfaces */
+  --muted: #eef8ee;            /* pale greenish section background */
+  --muted-foreground: #4b5563; /* slate-600 */
+
+  /* Borders / inputs */
+  --border: #dbeee0;           /* subtle green border */
+  --input: #ffffff;
+  --ring: #7dd3b3;             /* light mint focus */
+
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Charts & extras */
+  --chart-1: #15803d;
+  --chart-2: #34d399;
+  --chart-3: #f97316;
+  --chart-4: #60a5fa;
+  --chart-5: #ef4444;
+
+  --radius: 0.75rem;
+}
+
+/* Dark mode variants (optional) */
+.dark {
+  --background: #0b1210;
+  --foreground: #e6fff2;
+  --card: #07120f;
+  --card-foreground: #e6fff2;
+  --popover: #07120f;
+  --popover-foreground: #e6fff2;
+  --primary: #22c55e;
+  --primary-foreground: #06110b;
+  --secondary: #60a5fa;
+  --secondary-foreground: #061226;
+  --accent: #34d399;
+  --accent-foreground: #06110b;
+  --muted: #081614;
+  --muted-foreground: #94a3b8;
+  --border: #0f2a25;
+  --input: #07120f;
+  --ring: #7dd3b3;
+}
+
+/* map helper names (optional) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* --- BASE LAYER: only safe utilities --- */
+@layer base {
+  :where(input, textarea, select, button) {
+    @apply border border-border;
+    @apply bg-input;
+    @apply text-foreground;
+  }
+
+  html, body {
+    box-sizing: border-box;
+  }
+
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+   background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* 🌿 add background image */
+  background-image: 
+    url("/bg.png"), 
+    radial-gradient(circle at 12% 18%, rgba(21,128,61,0.03), transparent 35%),
+    radial-gradient(circle at 82% 78%, rgba(52,211,153,0.02), transparent 45%);
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  /* subtle blur overlay */
+  backdrop-filter: blur(6px);
+  }
+
+  a { color: var(--primary); }
+
+  /* small heading tweak */
+  h1,h2,h3,h4 { color: var(--foreground); }
+
+  /* reduce default focus outline; use ring instead */
+  :focus { outline: none; }
+}
+
+/* --- COMPONENTS LAYER --- */
+@layer components {
+  /* Card look: slightly elevated with soft green shadow to pop against background */
+  .hf-card {
+    @apply bg-card text-card-foreground p-4 rounded-lg;
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    box-shadow: 0 6px 18px rgba(13, 77, 40, 0.03); /* faint greenish shadow */
+  }
+  .hf-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 48px rgba(21,128,61,0.07);
+    border-color: rgba(21,128,61,0.06);
+  }
+
+  /* Primary button quick helper */
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.9rem;
+  }
+  .btn-primary:hover { filter: brightness(0.98); }
+
+  /* subtle badge */
+  .hf-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+    background-color: rgba(21,128,61,0.12);
+    color: var(--primary);
+  }
+
+  /* Inputs focus */
+  .hf-input:focus {
+    box-shadow: 0 0 0 6px rgba(125,211,152,0.08);
+    border-color: var(--ring);
+  }
+}
+
+/* mobile-friendly internal scrolling for long dropdowns */
+@media (pointer: coarse) {
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+}
+
+/* Smooth anchor scrolling */
+html { scroll-behavior: smooth; }

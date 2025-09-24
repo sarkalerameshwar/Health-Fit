@@ -23,7 +23,7 @@ const app = express();
 app.use(bodyParser.json());
 
 const corsOptions = {
-  origin: 'http://localhost:5173' || 'http://localhost:5174', // your frontend origin
+  origin: 'http://localhost:3000' || 'http://localhost:5173',// your frontend origin
   credentials: true,              // allow cookies/auth
 };
 

@@ -45,6 +45,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, "Confirm Address is required"],
     },
+    city: { 
+      type: String,
+      required: [true, "City is required"],
+      default: "Nanded"
+    },
     mobileNumber: {
       type: String,
       required: [true, "Mobile number is required"],

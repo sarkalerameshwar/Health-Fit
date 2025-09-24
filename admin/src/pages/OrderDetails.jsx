@@ -125,6 +125,9 @@ const OrderDetails = () => {
             <strong>Confirm Address:</strong> {order.confirmAddress}
           </div>
           <div>
+            <strong>City:</strong> {order.city}
+          </div>
+          <div>
             <strong>Mobile:</strong> {order.mobileNumber}
           </div>
           <div>
