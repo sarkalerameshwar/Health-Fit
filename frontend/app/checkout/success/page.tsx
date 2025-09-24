@@ -1,18 +1,73 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Download, Mail } from "lucide-react"
-import Link from "next/link" 
+import Link from "next/link"
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api"
 
 export default function CheckoutSuccessPage() {
-  // Mock order data - in real app this would come from the actual order
-  const orderDetails = {
-    orderNumber: "HF-2024-001234",
-    email: "customer@example.com",
-    subscriptionPlan: "Medium Box",
-    nextDelivery: "January 15, 2024",
-    total: 60.97,
+  const router = useRouter()
+  const [orderDetails, setOrderDetails] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const userData = localStorage.getItem("user")
+        const user = userData ? JSON.parse(userData) : null
+        const userId = user?._id
+
+        if (!token || !userId) {
+          setIsLoading(false)
+          return
+        }
+
+        const res = await fetch(`${API_BASE_URL}/orders/${userId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        })
+
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+
+        const data = await res.json()
+        console.log("Fetched orders:", data)
+
+        // ✅ new shape: data.data.orders
+        const orders = data?.data?.orders || []
+        if (orders.length > 0) {
+          setOrderDetails(orders[0]) // latest order
+        } else {
+          setOrderDetails(null)
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchOrderDetails()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="container py-12 text-center">
+          <p>Loading order details...</p>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -20,120 +75,86 @@ export default function CheckoutSuccessPage() {
       <Header />
       <main className="container py-12">
         <div className="max-w-2xl mx-auto text-center space-y-8">
-          {/* Success Icon */}
           <div className="flex justify-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
               <CheckCircle className="w-12 h-12 text-primary" />
             </div>
           </div>
 
-          {/* Success Message */}
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-primary">Order Confirmed!</h1>
+            <h1 className="text-4xl font-bold text-primary">
+              {orderDetails ? "Order Confirmed!" : "No Active Order"}
+            </h1>
             <p className="text-xl text-muted-foreground">
-              Thank you for subscribing to HealthFit. Your healthy journey starts now!
+              {orderDetails
+                ? "Thank you for subscribing to HealthFit. Your healthy journey starts now!"
+                : "You haven’t placed any order yet."}
             </p>
           </div>
 
-          {/* Order Details Card */}
-          <Card className="text-left">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Order Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Order Number</p>
-                  <p className="font-semibold">{orderDetails.orderNumber}</p>
+          {orderDetails && (
+            <Card className="text-left">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Order Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-semibold">{orderDetails.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-semibold">{orderDetails.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Plan</p>
+                    <p className="font-semibold">{orderDetails.plan}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Payment Method</p>
+                    <p className="font-semibold">{orderDetails.paymentMethod}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Mobile Number</p>
+                    <p className="font-semibold">{orderDetails.mobileNumber}</p>
+                  </div>
+                  {orderDetails.alternetNumber && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Alternate Number</p>
+                      <p className="font-semibold">{orderDetails.alternetNumber}</p>
+                    </div>
+                  )}
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-muted-foreground">Address</p>
+                    <p className="font-semibold">
+                      {orderDetails.address}, {orderDetails.city}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-semibold">{orderDetails.email}</p>
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Status</span>
+                    <span className="text-2xl font-bold text-primary">{orderDetails.status}</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Subscription Plan</p>
-                  <p className="font-semibold">{orderDetails.subscriptionPlan}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Next Delivery</p>
-                  <p className="font-semibold">{orderDetails.nextDelivery}</p>
-                </div>
-              </div>
-              <div className="pt-4 border-t">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total Paid</span>
-                  <span className="text-2xl font-bold text-primary">₹{orderDetails.total.toFixed(2)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* What's Next */}
-          <Card>
-            <CardHeader>
-              <CardTitle>What's Next?</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-left">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                    1
-                  </div>
-                  <div>
-                    <p className="font-semibold">Confirmation Email</p>
-                    <p className="text-sm text-muted-foreground">
-                      We've sent a confirmation email with your order details and tracking information.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                    2
-                  </div>
-                  <div>
-                    <p className="font-semibold">Preparation</p>
-                    <p className="text-sm text-muted-foreground">
-                      We'll carefully select and pack your fresh fruits according to your preferences.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                    3
-                  </div>
-                  <div>
-                    <p className="font-semibold">Delivery</p>
-                    <p className="text-sm text-muted-foreground">
-                      Your first box will arrive on {orderDetails.nextDelivery}. Enjoy your healthy treats!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
               <Link href="/dashboard">View Dashboard</Link>
             </Button>
-            <Button variant="outline" size="lg">
-              <Download className="mr-2 h-4 w-4" />
-              Download Receipt
-            </Button>
-          </div>
-
-          {/* Support */}
-          <div className="text-center text-sm text-muted-foreground">
-            <p>
-              Need help? Contact our support team at{" "}
-              <Link href="/inquiry" className="text-primary hover:underline">
-                support@healthfit.com
-              </Link>
-            </p>
+            {orderDetails && (
+              <Button variant="outline" size="lg">
+                <Download className="mr-2 h-4 w-4" />
+                Download Receipt
+              </Button>
+            )}
           </div>
         </div>
       </main>

@@ -7,7 +7,8 @@ import {
   getOrders,
   getOrderById,
   updateOrderStatus,
-  getOrdersByUserId
+  getOrdersByUserId,
+  checkSubscriptionStatus
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
@@ -19,7 +20,10 @@ router.post('/create', protect, createOrder);
 router.get('/', admin, getOrders);
 
 // Get orders by user ID
-router.get('/user/:userId', getOrdersByUserId);
+router.get('/:userId', getOrdersByUserId);
+
+// Get current user's latest order/subscription
+router.get('/user', protect, checkSubscriptionStatus);
 
 // Get single order by ID
 router.get('/:id', admin, getOrderById);
