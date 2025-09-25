@@ -5,25 +5,25 @@ import { Star } from "lucide-react"
 const testimonials = [
   {
     name: "Daksh Shinde",
-    avatar: "/professional-man-smiling.png",
+    avatar: "/daksh.jpg",
     rating: 5,
     comment:
-      "HealthFit has transformed my eating habits! The fruits are always fresh and the customization options are perfect.",
+      "नांदेडमध्येही ही सुविधा उपलब्ध आहे हे पाहून मनापासून आनंद झाला. खरोखरच हा उपक्रम आरोग्यदायी जीवनशैलीकडे एक मोठं पाऊल आहे.",
     initials: "SJ",
   },
   {
     name: "Prithviraj Jadhav",
-    avatar: "/professional-man-smiling.png",
+    avatar: "/prithvi.jpg",
     rating: 5,
     comment:
-      "Love the convenience and quality. The nutrition tracking feature helps me stay on top of my health goals.",
+      "सुविधा आणि गुणवत्तेमुळे मला खूप आवडले. पोषण ट्रॅकिंगची सुविधा माझ्या आरोग्याच्या उद्दिष्टांवर लक्ष ठेवण्यास मदत करते.",
     initials: "MC",
   },
   {
     name: "Aditya Khandre",
-    avatar: "/young-woman-smiling.png",
+    avatar: "/aditya.jpg",
     rating: 5,
-    comment: "The variety is amazing! I've discovered so many new fruits I never would have tried otherwise.",
+    comment: "विविधता अफलातून आहे! इतकी नवी फळं मला मिळाली की जी मी अन्यथा कधीही चाखली नसती.",
     initials: "ED",
   },
 ]

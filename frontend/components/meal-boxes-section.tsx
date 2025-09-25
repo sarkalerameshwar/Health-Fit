@@ -139,7 +139,8 @@ export function MealBoxesSection() {
             {demoBoxes.map((box, index) => (
               <Card
                 key={index}
-                className="flex flex-col items-center text-center p-4 rounded-2xl shadow-sm hover:shadow-md transition bg-white max-w-xs mx-auto"
+                className="flex flex-col items-center text-center p-4 rounded-2xl shadow-sm hover:shadow-md transition bg-white max-w-xs mx-auto
+                           hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-in-out" // HOVER EFFECT ADDED HERE
               >
                 <div className="w-28 h-28 relative mb-3">
                   {/* circle image */}
@@ -230,25 +231,29 @@ function MealBoxCard({
   onChoose: () => void
 }) {
   return (
-    <Card className={`relative w-full max-w-2xl mx-auto flex flex-col sm:flex-row overflow-hidden rounded-xl ${box.popular ? "border-primary shadow-lg" : ""}`}>
+    <Card className={`relative w-full max-w-2xl mx-auto flex flex-col sm:flex-row overflow-hidden rounded-xl
+                     ${box.popular ? "border-primary shadow-lg" : ""}
+                     hover:scale-[1.02] hover:shadow-xl transition-all duration-300 ease-in-out`}> {/* HOVER EFFECT ADDED HERE */}
       {box.popular && (
         <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs sm:text-sm">Most Popular</Badge>
       )}
 
-      {/* FIXED: Removed h-48 and used aspect-[4/3] to maintain a better image ratio on mobile (w-full), 
-        preventing aggressive zooming/cropping. Reverts to default on sm:
-      */}
-      <div className="relative w-full h-40 sm:w-2/5 sm:h-auto sm:aspect-auto">
-  <Image src={box.image} alt={box.name} fill className="object-cover sm:object-cover" />
-</div>
+      {/* Image container adjustments */}
+      <div className="relative w-full h-48 sm:h-auto sm:w-2/5 aspect-w-4 aspect-h-3 sm:aspect-none"> {/* Added aspect ratios for better control */}
+        <Image
+          src={box.image}
+          alt={box.name}
+          fill
+          className="object-contain sm:object-cover p-2 sm:p-0" // Changed to object-contain and added padding for full image
+        />
+      </div>
 
-
-      <div className="flex flex-col justify-between sm:w-3/5 p-6">
-        <CardHeader className="text-center pb-4">
+      <div className="flex flex-col justify-between sm:w-3/5 p-4 sm:p-6"> {/* Adjusted padding for better fit */}
+        <CardHeader className="text-center pb-2 sm:pb-4"> {/* Adjusted padding */}
           <CardTitle className="text-xl sm:text-2xl">{box.name}</CardTitle>
           <CardDescription className="text-sm">{box.description}</CardDescription>
 
-          <div className="mt-4 flex flex-col items-center justify-center gap-1">
+          <div className="mt-3 sm:mt-4 flex flex-col items-center justify-center gap-1">
             <span className="text-base sm:text-lg text-muted-foreground line-through">{box.originalPrice}</span>
             <div className="flex items-baseline gap-1">
               <span className="text-3xl sm:text-4xl font-bold text-primary">{box.price}</span>
@@ -259,7 +264,7 @@ function MealBoxCard({
           <p className="text-xs sm:text-sm text-muted-foreground mt-2">{box.items}</p>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-0">
+        <CardContent className="space-y-3 pt-0"> {/* Adjusted padding */}
           <ul className="space-y-2 text-left">
             {box.features.map((feature, i) => (
               <li key={i} className="flex items-start gap-2">

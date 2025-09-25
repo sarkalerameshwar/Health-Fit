@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Leaf } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image" // Use Next.js Image component for better optimization
+import { TypingText } from './TypingText'; // Import the new component
 
 // plain images from /public
 const DEFAULT_IMAGES = ["/fruit-im.jpg", "/fruit1.jpg", "/hero3.jpg"]
@@ -111,15 +112,24 @@ export function HeroSection({
           <div className="flex flex-col justify-center space-y-6 sm:space-y-4 text-center lg:text-left">
             <div className="space-y-4 sm:space-y-2">
               <h1 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-5xl xl:text-6xl/none text-balance">
-                Healthy Living with <span className="text-primary">HealthFit</span>
-              </h1>
-              <p className="max-w-[600px] text-muted-foreground text-base sm:text-lg md:text-xl text-pretty mx-auto lg:mx-0">
-                Discover the perfect blend of nutrition and convenience with our customizable fruit meal boxes. Fresh,
-                organic, and delivered right to your doorstep.
+  Healthy Living with{" "}
+  <TypingText
+    texts={["HealthFit", "Fresh Meals", "Organic Life"]} // 👈 you can add multiple phrases
+    className="text-primary"
+    speed={100}       // typing speed (lower = faster)
+    deleteSpeed={60}  // backspace speed
+    pause={1500}      // pause before deleting
+  />
+</h1>
+
+              <p className="max-w-[700px] text-muted-foreground text-base sm:text-lg md:text-xl text-pretty mx-auto lg:mx-0">
+                Discover the perfect blend of nutrition and convenience with our customizable fruit meal boxes.
+                Each box is curated with fresh, organic, and delicious ingredients, designed to boost your energy
+                and simplify your healthy lifestyle. Delivered right to your doorstep, making healthy eating effortless.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:gap-2 min-[400px]:flex-row justify-center lg:justify-start">
+            <div className="flex flex-col gap-3 sm:gap-2 min-[400px]:flex-row justify-center lg:justify-start"> {/* 'justify-center' added for mobile */}
               <Link href="#meal-boxes-section" className="inline-flex">
                 <button className="inline-flex items-center gap-2 h-12 px-6 text-base rounded-md bg-primary text-primary-foreground hover:brightness-95">
                   Subscribe Now <ArrowRight className="h-4 w-4" />
@@ -159,26 +169,25 @@ export function HeroSection({
                       style={{ width: `${slidePct}%`, padding: 8, boxSizing: "border-box" }}
                     >
                       <div
-  className="relative overflow-hidden rounded-xl"
-  style={{
-    aspectRatio: "4/3",
-    maxHeight: "400px",
-  }}
->
+                        className="relative overflow-hidden rounded-xl"
+                        style={{
+                          aspectRatio: "4/3",
+                          maxHeight: "400px",
+                        }}
+                      >
                         {/* Use Next.js Image component with proper sizing */}
-                        <img
-  src={src}
-  alt={`slide-${idx}`}
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "contain", // Always use contain
-    objectPosition: "center",
-    display: "block",
-  }}
-  draggable={false}
-  loading={idx === 0 ? "eager" : "lazy"}
-/>
+                        <Image // Changed img to Image
+                          src={src}
+                          alt={`slide-${idx}`}
+                          fill // Use fill for Image component
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add responsive sizes
+                          style={{
+                            objectFit: "contain", // Always use contain
+                            objectPosition: "center",
+                          }}
+                          draggable={false}
+                          priority={idx === 0} // Use priority instead of loading for first image
+                        />
                       </div>
                     </div>
                   ))}

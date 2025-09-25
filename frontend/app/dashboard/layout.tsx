@@ -1,6 +1,6 @@
 import type React from "react"
 import Link from "next/link"
-import { Leaf } from "lucide-react"
+import Image from "next/image"
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 
@@ -15,8 +15,14 @@ export default function DashboardLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Leaf className="h-6 w-6 text-primary" />
-              <span className="text-primary">HealthFit</span>
+              <Image 
+                src="/images/logo1.png" // Your image path
+                alt="HealthFit Logo"
+                width={40} // Adjust size as needed
+                height={40}
+                className="h-20 w-20 object-contain"
+              />
+              {/* Text removed - only image will show */}
             </Link>
           </div>
           <div className="flex-1">

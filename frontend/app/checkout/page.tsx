@@ -252,7 +252,7 @@ export default function CheckoutPage() {
               <div className="p-4 border rounded-lg bg-gradient-to-br from-white/60 to-gray-50 text-center">
                 <p className="text-sm font-medium mb-2">Order Total</p>
                 <p className="text-2xl font-bold mb-3">
-                  ${orderSummary?.total.toFixed(2) || "0.00"}
+                  ₹{orderSummary?.total.toFixed(2) || "0.00"}
                 </p>
 
                 <blockquote className="text-xs italic text-muted-foreground mb-3">
