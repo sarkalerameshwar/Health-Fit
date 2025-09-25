@@ -12,7 +12,7 @@ import CheckoutSuccessPage from "./pages/CheckoutSuccessPage"
 import DashboardPage from "./pages/DashboardPage"
 import ProfilePage from "./pages/ProfilePage"
 import OrdersPage from "./pages/OrdersPage"
-import OffersPage from "./pages/OffersPage"
+import ResetPasswordPage from "./pages/reset-password/ResetPasswordPage"
 import InquiryPage from "./pages/InquiryPage"
 import FeedbackPage from "./pages/FeedbackPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
@@ -26,6 +26,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />

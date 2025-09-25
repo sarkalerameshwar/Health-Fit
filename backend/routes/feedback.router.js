@@ -1,14 +1,14 @@
 import express from "express";
 import { addFeedback, getAllFeedback } from "../controllers/feedback.controller.js";
-import { protect } from "../middlewares/auth.middleware.js"; // your JWT auth middleware
+import { protect } from "../middlewares/auth.middleware.js";
 import admin from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
-// User adds feedback
+// Add feedback (protected route)
 router.post("/add", protect, addFeedback);
 
-// Admin sees all feedback
-router.get("/all",admin , getAllFeedback); // add admin middleware if needed
+// Get all feedback (admin only)
+router.get("/all", admin, getAllFeedback);
 
 export default router;

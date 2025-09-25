@@ -1,44 +1,94 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Loader2, CheckCircle, Star } from "lucide-react"
+import type React from "react";
+import { useState } from "react";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Loader2, CheckCircle, Star } from "lucide-react";
 
 export default function FeedbackPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [rating, setRating] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [rating, setRating] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    orderNumber: "",
     category: "",
     feedback: "",
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setIsSubmitting(false)
-    setIsSuccess(true)
-  }
+  });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value })
-  }
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
+    if (!token || !userStr) {
+      alert("Please log in first.");
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+    const userId = user._id || user.id;
+    const { username, email } = user;
+
+    if (!rating || !formData.category || !formData.feedback) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        userId,
+        username,
+        email,
+        category: formData.category,
+        message: formData.feedback,
+        rating: parseInt(rating),
+      };
+
+      console.log("Payload to send:", payload);
+
+      const res = await fetch("http://localhost:5000/api/feedback/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to submit feedback");
+      }
+
+      setIsSuccess(true);
+      setRating("");
+      setFormData({ category: "", feedback: "" });
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert((error as Error).message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isSuccess) {
     return (
@@ -58,7 +108,7 @@ export default function FeedbackPage() {
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
@@ -80,107 +130,59 @@ export default function FeedbackPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-              
-
+                {/* Rating */}
                 <div className="space-y-3">
                   <Label>Overall Rating</Label>
                   <RadioGroup value={rating} onValueChange={setRating}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="5" id="r5" />
-                      <Label htmlFor="r5" className="flex items-center gap-1">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                          ))}
-                        </div>
-                        Excellent
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="4" id="r4" />
-                      <Label htmlFor="r4" className="flex items-center gap-1">
-                        <div className="flex">
-                          {[1, 2, 3, 4].map((i) => (
-                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                          ))}
-                          <Star className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        Good
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="3" id="r3" />
-                      <Label htmlFor="r3" className="flex items-center gap-1">
-                        <div className="flex">
-                          {[1, 2, 3].map((i) => (
-                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                          ))}
-                          {[4, 5].map((i) => (
-                            <Star key={i} className="h-4 w-4 text-muted-foreground" />
-                          ))}
-                        </div>
-                        Average
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="r2" />
-                      <Label htmlFor="r2" className="flex items-center gap-1">
-                        <div className="flex">
-                          {[1, 2].map((i) => (
-                            <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                          ))}
-                          {[3, 4, 5].map((i) => (
-                            <Star key={i} className="h-4 w-4 text-muted-foreground" />
-                          ))}
-                        </div>
-                        Poor
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1" id="r1" />
-                      <Label htmlFor="r1" className="flex items-center gap-1">
-                        <div className="flex">
-                          <Star className="h-4 w-4 fill-primary text-primary" />
-                          {[2, 3, 4, 5].map((i) => (
-                            <Star key={i} className="h-4 w-4 text-muted-foreground" />
-                          ))}
-                        </div>
-                        Very Poor
-                      </Label>
-                    </div>
+                    {[
+                      { value: "5", label: "Excellent" },
+                      { value: "4", label: "Good" },
+                      { value: "3", label: "Average" },
+                      { value: "2", label: "Poor" },
+                      { value: "1", label: "Very Poor" },
+                    ].map((item) => (
+                      <div key={item.value} className="flex items-center space-x-2">
+                        <RadioGroupItem value={item.value} id={`r${item.value}`} />
+                        <Label htmlFor={`r${item.value}`} className="flex items-center gap-1">
+                          <div className="flex">
+                            {[...Array(parseInt(item.value))].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                            ))}
+                            {[...Array(5 - parseInt(item.value))].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 text-muted-foreground" />
+                            ))}
+                          </div>
+                          {item.label}
+                        </Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
 
+                {/* Category */}
                 <div className="space-y-3">
                   <Label>Feedback Category</Label>
-                  <RadioGroup value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="product-quality" id="pq" />
-                      <Label htmlFor="pq">Product Quality</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="delivery" id="del" />
-                      <Label htmlFor="del">Delivery Service</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="customer-service" id="cs" />
-                      <Label htmlFor="cs">Customer Service</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="website" id="web" />
-                      <Label htmlFor="web">Website Experience</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="pricing" id="price" />
-                      <Label htmlFor="price">Pricing</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="other" />
-                      <Label htmlFor="other">Other</Label>
-                    </div>
+                  <RadioGroup
+                    value={formData.category}
+                    onValueChange={(value) => handleInputChange("category", value)}
+                  >
+                    {[
+                      "Product Quality",
+                      "Delivery Service",
+                      "Customer Service",
+                      "Website Experience",
+                      "Pricing",
+                      "Other",
+                    ].map((cat) => (
+                      <div key={cat} className="flex items-center space-x-2">
+                        <RadioGroupItem value={cat} id={cat.replace(/\s/g, "")} />
+                        <Label htmlFor={cat.replace(/\s/g, "")}>{cat}</Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </div>
 
+                {/* Feedback Textarea */}
                 <div className="space-y-2">
                   <Label htmlFor="feedback">Your Feedback</Label>
                   <Textarea
@@ -204,5 +206,5 @@ export default function FeedbackPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

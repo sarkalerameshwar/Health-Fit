@@ -39,7 +39,7 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password,
+          password: formData.password, // only sent to server
         }),
       });
 
@@ -53,18 +53,23 @@ export function LoginForm() {
         return;
       }
 
-      // Store credentials in localStorage
-      if (data.token) {
-        localStorage.setItem("token", data.token); // JWT for authorization
-      }
-
+      // Store minimal user info only
       if (data.result) {
-        localStorage.setItem("user", JSON.stringify(data.result)); // Save full user object
-        localStorage.setItem("userEmail", data.result.email); // Optional: separate email for payment
+        const minimalUser = {
+          username: data.result.username,
+          userId: data.result._id,
+          userEmail: data.result.email, // store inside minimal user
+        };
+        localStorage.setItem("user", JSON.stringify(minimalUser));
+        localStorage.setItem("useremail", data.result.email); // separate key for convenience
       }
 
-      console.log("Login successful:", data.user);
-      router.push("/"); // Redirect after login
+      if (data.token) {
+        localStorage.setItem("token", data.token); // store JWT for auth
+      }
+
+      console.log("Login successful:", data.result);
+      router.push("/"); // redirect after login
     } catch (err) {
       console.error("Login error:", err);
       setError("Login failed. Please try again.");

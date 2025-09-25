@@ -1,30 +1,39 @@
 import Feedback from "../models/feedback.model.js";
-import User from "../models/user.model.js";
 
-// Add Feedback
+// Add Feedback (All data from frontend)
 export const addFeedback = async (req, res) => {
   try {
-    const userId = req.user.id; // from your auth middleware (JWT)
-    const user = await User.findById(userId);
+    const { userId, username, email, category, message, rating } = req.body;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Validation
+    if (!userId || !username || !email || !category || !message || !rating) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const { message, rating } = req.body;
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
 
     const feedback = new Feedback({
       userId,
-      username: user.username,
-      email: user.email,
+      username,
+      email,
+      category,
       message,
-      rating
+      rating: parseInt(rating) // Ensure it's a number
     });
 
     await feedback.save();
-    res.status(201).json({ message: "Feedback submitted successfully!", feedback });
+
+    res.status(201).json({ 
+      message: "Feedback submitted successfully!", 
+      feedback 
+    });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error: error.message });
+    res.status(500).json({ 
+      message: "Something went wrong", 
+      error: error.message 
+    });
   }
 };
 
@@ -45,4 +54,4 @@ export const getAllFeedback = async (req, res) => {
   }
 };
 
-export default {addFeedback, getAllFeedback};
+export default { addFeedback, getAllFeedback };
