@@ -172,14 +172,16 @@ export default function InquiryPage() {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">support@healthfit.com</p>
+                    <p className="text-sm text-muted-foreground">healthfit189@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">Phone</p>
-                    <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-sm text-muted-foreground">9226442954</p>
+                    <p className="text-sm text-muted-foreground">9657432340</p>
+                    <p className="text-sm text-muted-foreground">9699331765</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -187,9 +189,9 @@ export default function InquiryPage() {
                   <div>
                     <p className="font-medium">Address</p>
                     <p className="text-sm text-muted-foreground">
-                      123 Health Street
+                      Anand Nagar
                       <br />
-                      Fresh City, FC 12345
+                      Nanded, 431601
                     </p>
                   </div>
                 </div>
@@ -198,9 +200,9 @@ export default function InquiryPage() {
                   <div>
                     <p className="font-medium">Business Hours</p>
                     <p className="text-sm text-muted-foreground">
-                      Mon-Fri: 9AM-6PM
+                      Mon-Fri: 6AM-10AM
                       <br />
-                      Sat-Sun: 10AM-4PM
+                      Sat-Sun: 6AM-11AM
                     </p>
                   </div>
                 </div>
@@ -223,7 +225,7 @@ export default function InquiryPage() {
                 </div>
                 <div>
                   <p className="font-medium text-sm">Can I pause my subscription?</p>
-                  <p className="text-xs text-muted-foreground">Yes, you can pause or cancel anytime.</p>
+                  <p className="text-xs text-muted-foreground">No, currently we don't have that feature but you can cantact directly to our service agents.</p>
                 </div>
               </CardContent>
             </Card>
