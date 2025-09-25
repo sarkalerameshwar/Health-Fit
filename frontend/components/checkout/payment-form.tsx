@@ -1,52 +1,33 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Smartphone, Truck } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { paymentMethods, OrderPayload, createOrder, uploadPaymentProof } from "@/lib/checkout"
+import { paymentMethods } from "@/lib/checkout"
 
 interface PaymentFormProps {
   selectedPaymentMethod: string
   onPaymentMethodChange: (methodId: string) => void
-  isFormValid: boolean
-  upiId: string
-  onUpiIdChange: (upiId: string) => void
   upiScreenshot: File | null
   onUpiScreenshotChange: (file: File | null) => void
   upiUTR: string
   onUpiUTRChange: (upiUTR: string) => void
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error("Failed to read file"))
-    reader.readAsDataURL(file)
-  })
-}
-
 export function PaymentForm({
   selectedPaymentMethod,
   onPaymentMethodChange,
-  isFormValid,
-  upiId,
-  onUpiIdChange,
   upiScreenshot,
   onUpiScreenshotChange,
   upiUTR,
   onUpiUTRChange,
 }: PaymentFormProps) {
-  const router = useRouter()
   const [validationMessage, setValidationMessage] = useState("")
   const [copiedVendorUpi, setCopiedVendorUpi] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
   const [upiScreenshotFile, setUpiScreenshotFile] = useState<File | null>(null)
   const [upiScreenshotPreview, setUpiScreenshotPreview] = useState<string | null>(null)
   const [localUpiUTR, setLocalUpiUTR] = useState(upiUTR || "")
@@ -63,93 +44,88 @@ export function PaymentForm({
     }
   }
 
-  const handlePlaceOrder = async () => {
-    setValidationMessage("")
-    const token = localStorage.getItem("token")
-    if (!token) {
-      setValidationMessage("You must be logged in to place an order.")
-      return
-    }
-
-    if (!isFormValid) {
-      setValidationMessage("Please fill all required shipping & order details.")
-      const el = document.getElementById("shipping-form")
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
-      return
-    }
-
-    if (selectedPaymentMethod === "upi") {
+  // Validate UPI payment when fields change
+  const validateUpiPayment = () => {
+    if (selectedPaymentMethod === "UPI") {
       if (!upiScreenshotFile) {
-        setValidationMessage("Please upload the screenshot of the payment.")
-        return
+        return "Please upload the payment screenshot"
       }
       if (!localUpiUTR.trim()) {
-        setValidationMessage("Please enter the transaction UTR / reference.")
-        return
+        return "Please enter the transaction UTR / reference"
       }
     }
-
-    setIsProcessing(true)
-
-    try {
-      // Upload UPI screenshot if payment method is UPI
-      let uploadedScreenshotBase64: string | undefined = undefined
-      if (selectedPaymentMethod === "upi" && upiScreenshotFile) {
-        setIsUploading(true)
-        uploadedScreenshotBase64 = await fileToBase64(upiScreenshotFile)
-        localStorage.setItem("healthfit-upi-screenshot", uploadedScreenshotBase64)
-        localStorage.setItem("healthfit-upi-utr", localUpiUTR.trim())
-        setIsUploading(false)
-      }
-
-      // Prepare order payload
-      const subscription = localStorage.getItem("healthfit-subscription")
-      const orderSummary = localStorage.getItem("healthfit-order-summary")
-      const shipping = localStorage.getItem("healthfit-shipping")
-      const orderPayload: OrderPayload = {
-        orderSummary: orderSummary ? JSON.parse(orderSummary) : { selectedProducts: [], subtotal: 0, shipping: 0, tax: 0, total: 0 },
-        shippingAddress: shipping ? JSON.parse(shipping) : { phone: "", address: "", area: "", city: "" },
-        paymentMethod: selectedPaymentMethod,
-        upiId: selectedPaymentMethod === "upi" ? upiId : undefined,
-        upiScreenshot: uploadedScreenshotBase64,
-        upiUTR: selectedPaymentMethod === "upi" ? localUpiUTR.trim() : undefined,
-        orderId: `HF-${Date.now()}`,
-        timestamp: Date.now(),
-      }
-
-      // Create order
-      await createOrder(orderPayload)
-      router.push("/checkout/success")
-    } catch (error: any) {
-      console.error(error)
-      setValidationMessage(error.message || "Something went wrong. Please try again.")
-    } finally {
-      setIsProcessing(false)
-    }
+    return ""
   }
 
   const onUpiScreenshotChangeHandler = (file?: File | null) => {
-    if (!file) { setUpiScreenshotFile(null); setUpiScreenshotPreview(null); return }
+    if (!file) { 
+      setUpiScreenshotFile(null); 
+      setUpiScreenshotPreview(null); 
+      onUpiScreenshotChange(null);
+      setValidationMessage("")
+      return; 
+    }
+    
     const allowed = ["image/png","image/jpeg","image/jpg","image/webp"]
-    if (!allowed.includes(file.type)) { setValidationMessage("Only PNG/JPG/WebP allowed."); return }
-    if (file.size > 6*1024*1024) { setValidationMessage("Screenshot too large — max 6MB."); return }
+    if (!allowed.includes(file.type)) { 
+      setValidationMessage("Only PNG/JPG/WebP allowed."); 
+      return; 
+    }
+    
+    if (file.size > 6*1024*1024) { 
+      setValidationMessage("Screenshot too large — max 6MB."); 
+      return; 
+    }
+    
     setValidationMessage("")
     setUpiScreenshotFile(file)
     setUpiScreenshotPreview(URL.createObjectURL(file))
+    onUpiScreenshotChange(file)
   }
+
+  const clearUpiFields = () => {
+    setUpiScreenshotFile(null)
+    setUpiScreenshotPreview(null)
+    setLocalUpiUTR("")
+    setValidationMessage("")
+    onUpiScreenshotChange(null)
+    onUpiUTRChange("")
+  }
+
+  // Auto-validate when UPI fields change
+  useEffect(() => {
+    const error = validateUpiPayment()
+    setValidationMessage(error)
+  }, [selectedPaymentMethod, upiScreenshotFile, localUpiUTR])
+
+  // Update localUpiUTR when parent prop changes
+  useEffect(() => {
+    setLocalUpiUTR(upiUTR || "")
+  }, [upiUTR])
+
+  // Update upiScreenshotFile when parent prop changes
+  useEffect(() => {
+    setUpiScreenshotFile(upiScreenshot)
+  }, [upiScreenshot])
 
   return (
     <Card>
-      <CardHeader><CardTitle>Payment Method</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Payment Method</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-6">
-        {validationMessage && <div className="px-3 py-2 bg-red-50 border border-red-200 text-sm text-red-700 rounded">{validationMessage}</div>}
+        {validationMessage && (
+          <div className="px-3 py-2 bg-red-50 border border-red-200 text-sm text-red-700 rounded">
+            {validationMessage}
+          </div>
+        )}
 
         <RadioGroup value={selectedPaymentMethod} onValueChange={onPaymentMethodChange}>
           {paymentMethods.map((method) => (
             <div key={method.id} className="flex items-center space-x-2">
               <RadioGroupItem value={method.id} id={method.id} />
               <Label htmlFor={method.id} className="flex items-center gap-3 cursor-pointer flex-1">
-                {method.id === "upi" ? <Smartphone className="h-5 w-5" /> : <Truck className="h-5 w-5" />}
+                {method.id === "UPI" ? <Smartphone className="h-5 w-5" /> : <Truck className="h-5 w-5" />}
                 <div>
                   <p className="font-medium">{method.name}</p>
                   <p className="text-sm text-muted-foreground">{method.description}</p>
@@ -160,7 +136,7 @@ export function PaymentForm({
         </RadioGroup>
 
         {/* UPI Payment */}
-        {selectedPaymentMethod === "upi" && (
+        {selectedPaymentMethod === "UPI" && (
           <div className="space-y-4 p-4 border rounded-lg">
             <div className="grid gap-4 sm:grid-cols-[300px_1fr] items-start">
               <div className="flex items-center justify-center">
@@ -171,25 +147,57 @@ export function PaymentForm({
                   <Label htmlFor="vendorUpi">UPI ID (payee)</Label>
                   <div className="flex items-center gap-3 mt-1">
                     <p id="vendorUpi" className="font-medium select-all">{vendorUpi}</p>
-                    <Button variant="outline" size="sm" onClick={handleCopyVendorUpi}>{copiedVendorUpi ? "Copied!" : "Copy"}</Button>
+                    <Button variant="outline" size="sm" onClick={handleCopyVendorUpi}>
+                      {copiedVendorUpi ? "Copied!" : "Copy"}
+                    </Button>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Scan the QR code or use this UPI ID to make payment
+                  </p>
                 </div>
 
                 <div>
-                  <Label>Upload payment screenshot</Label>
-                  <input type="file" accept="image/*" onChange={e => onUpiScreenshotChangeHandler(e.target.files ? e.target.files[0] : undefined)} className="text-sm"/>
+                  <Label htmlFor="screenshot">Upload payment screenshot *</Label>
+                  <Input 
+                    id="screenshot"
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => onUpiScreenshotChangeHandler(e.target.files ? e.target.files[0] : undefined)} 
+                    className="text-sm"
+                  />
                   <small className="text-xs text-muted-foreground">PNG / JPG, max 6MB</small>
-                  {upiScreenshotPreview && <div className="mt-2"><div className="text-xs text-muted-foreground mb-1">Preview</div><img src={upiScreenshotPreview} alt="preview" className="w-40 h-40 object-cover rounded-md border"/></div>}
+                  {upiScreenshotPreview && (
+                    <div className="mt-2">
+                      <div className="text-xs text-muted-foreground mb-1">Preview</div>
+                      <img src={upiScreenshotPreview} alt="preview" className="w-40 h-40 object-cover rounded-md border"/>
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                  <Label htmlFor="upiUTR">Transaction UTR / Reference</Label>
-                  <Input id="upiUTR" value={localUpiUTR} onChange={e => setLocalUpiUTR(e.target.value)} placeholder="Enter UTR / transaction reference"/>
+                  <Label htmlFor="upiUTR">Transaction UTR / Reference *</Label>
+                  <Input 
+                    id="upiUTR" 
+                    value={localUpiUTR} 
+                    onChange={e => {
+                      setLocalUpiUTR(e.target.value)
+                      onUpiUTRChange(e.target.value)
+                    }} 
+                    placeholder="Enter UTR / transaction reference number"
+                  />
+                  <small className="text-xs text-muted-foreground">
+                    Find this in your bank app or UPI app transaction history
+                  </small>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handlePlaceOrder} variant="default" size="sm" disabled={isUploading || isProcessing}>{isProcessing ? "Processing..." : "Place Order"}</Button>
-                  <Button onClick={() => { setUpiScreenshotFile(null); setUpiScreenshotPreview(null); setLocalUpiUTR(""); setValidationMessage("") }} variant="outline" size="sm">Clear</Button>
+                  <Button 
+                    onClick={clearUpiFields} 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    Clear UPI Details
+                  </Button>
                 </div>
               </div>
             </div>
@@ -197,20 +205,23 @@ export function PaymentForm({
         )}
 
         {/* Cash On Delivery Payment */}
-        {selectedPaymentMethod === "Cash On Delivery" && (
-          <div className="space-y-4 p-4 border rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              You have selected <strong>Cash on Delivery (Cash On Delivery)</strong>. Please keep the exact amount ready.
-            </p>
-            <div className="flex gap-2">
-              <Button onClick={handlePlaceOrder} variant="default" size="sm" disabled={isProcessing}>{isProcessing ? "Processing..." : "Place Order"}</Button>
-              <Button onClick={() => setValidationMessage("")} variant="outline" size="sm" disabled={isProcessing}>Cancel</Button>
+        {selectedPaymentMethod === "COD" && (
+          <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+            <div className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-blue-600" />
+              <p className="text-sm font-medium text-blue-800">Cash on Delivery Selected</p>
             </div>
+            <p className="text-sm text-blue-700">
+              You'll pay when you receive your order. Please keep the exact amount ready for our delivery executive.
+            </p>
+            <ul className="text-xs text-blue-600 space-y-1">
+              <li>• No advance payment required</li>
+              <li>• Pay when you receive your products</li>
+              <li>• Please have exact change ready</li>
+            </ul>
           </div>
         )}
       </CardContent>
     </Card>
   )
 }
-
-export default PaymentForm

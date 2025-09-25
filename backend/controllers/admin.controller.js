@@ -25,7 +25,7 @@ const login = (req, res) => {
         const payload = { username }; // You can also add roles or userId here
 
         // Generate JWT Token (expires in 1 hour)
-        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 
         return res.status(200).json({
             success: true,

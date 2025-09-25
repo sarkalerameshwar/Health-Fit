@@ -27,7 +27,7 @@ const Dashboard = () => {
         const subsData = await subsRes.json();
 
         // Fetch users
-        const usersRes = await fetch("http://localhost:5000/api/user", {
+        const usersRes = await fetch("http://localhost:5000/api/user/all", {
           headers,
         });
         const usersData = await usersRes.json();

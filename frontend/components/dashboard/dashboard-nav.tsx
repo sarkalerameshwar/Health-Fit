@@ -21,26 +21,26 @@ const navItems = [
     href: "/dashboard/orders",
     icon: CreditCard,
   },
-  {
-    title: "Nutrition Tracking",
-    href: "/dashboard/nutrition",
-    icon: BarChart3,
-  },
-  {
-    title: "Delivery Schedule",
-    href: "/dashboard/schedule",
-    icon: Calendar,
-  },
-  {
-    title: "Profile",
-    href: "/dashboard/profile",
-    icon: User,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Nutrition Tracking",
+  //   href: "/dashboard/nutrition",
+  //   icon: BarChart3,
+  // },
+  // {
+  //   title: "Delivery Schedule",
+  //   href: "/dashboard/schedule",
+  //   icon: Calendar,
+  // },
+  // {
+  //   title: "Profile",
+  //   href: "/dashboard/profile",
+  //   icon: User,
+  // },
+  // {
+  //   title: "Settings",
+  //   href: "/dashboard/settings",
+  //   icon: Settings,
+  // },
 ]
 
 export function DashboardNav() {

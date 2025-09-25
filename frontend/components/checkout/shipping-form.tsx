@@ -22,7 +22,7 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
     localStorage.setItem("healthfit-shipping", JSON.stringify(updated));
   };
 
-  // Default city
+  // Default city to match backend schema default
   const cityValue = shippingAddress.city || "Nanded";
 
   return (
@@ -34,7 +34,7 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
         {/* Address */}
         <div className="space-y-2">
           <Label htmlFor="address" className="text-sm font-medium">
-            Address
+            Address <span className="text-red-500">*</span>
           </Label>
           <Input
             id="address"
@@ -49,7 +49,7 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
         {/* Confirm Address */}
         <div className="space-y-2">
           <Label htmlFor="confirmAddress" className="text-sm font-medium">
-            Confirm Address
+            Confirm Address <span className="text-red-500">*</span>
           </Label>
           <Input
             id="confirmAddress"
@@ -61,10 +61,10 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
           />
         </div>
 
-        {/* Area */}
+        {/* Area / Locality */}
         <div className="space-y-2">
           <Label htmlFor="area" className="text-sm font-medium">
-            Area / Locality
+            Area / Locality <span className="text-red-500">*</span>
           </Label>
           <Input
             id="area"
@@ -79,7 +79,7 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
         {/* Mobile Number */}
         <div className="space-y-2">
           <Label htmlFor="mobileNumber" className="text-sm font-medium">
-            Mobile Number
+            Mobile Number <span className="text-red-500">*</span>
           </Label>
           <Input
             id="mobileNumber"
@@ -87,14 +87,15 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
             className="h-10 sm:h-11"
             value={shippingAddress.mobileNumber || ""}
             onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
+            placeholder="Enter your mobile number"
             required
           />
         </div>
 
-        {/* Alternate Mobile Number */}
+        {/* Alternate Number */}
         <div className="space-y-2">
           <Label htmlFor="alternateNumber" className="text-sm font-medium">
-            Alternate Mobile Number (Optional)
+            Alternate Number (Optional)
           </Label>
           <Input
             id="alternateNumber"
@@ -102,19 +103,22 @@ export function ShippingForm({ shippingAddress, onAddressChange }: ShippingFormP
             className="h-10 sm:h-11"
             value={shippingAddress.alternateNumber || ""}
             onChange={(e) => handleInputChange("alternateNumber", e.target.value)}
+            placeholder="Enter alternate number (optional)"
           />
         </div>
 
         {/* City */}
         <div className="space-y-2">
           <Label htmlFor="city" className="text-sm font-medium">
-            City
+            City <span className="text-red-500">*</span>
           </Label>
           <Input
             id="city"
             className="h-10 sm:h-11"
             value={cityValue}
-            readOnly
+            onChange={(e) => handleInputChange("city", e.target.value)}
+            placeholder="Enter city"
+            required
           />
         </div>
       </CardContent>

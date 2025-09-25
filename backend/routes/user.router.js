@@ -6,10 +6,12 @@ import {
   forgotPassword,
   verifyResetPasswordOtp,
   resendResetPasswordOtp,
-  getAllUsers
+  getAllUsers,
+  getUserById
 } from "../controllers/user.controller.js";
 import { get } from "http";
 import admin from "../middlewares/admin.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -24,6 +26,7 @@ router.post("/login", login);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-password-otp', verifyResetPasswordOtp);
 router.post('/resend-reset-password-otp', resendResetPasswordOtp);
-router.get('/',admin, getAllUsers);
+router.get('/all',admin, getAllUsers);
+router.get('/', protect, getUserById);
 
 export default router;

@@ -8,6 +8,9 @@ export const createOrder = async (req, res) => {
   const userId = req.user._id;
 
   try {
+    console.log("Creating order for user:", userId);
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+
     const {
       plan,
       address,
@@ -28,6 +31,14 @@ export const createOrder = async (req, res) => {
       !paymentMethod ||
       !planDetails
     ) {
+      console.error("Missing required fields:", {
+        plan,
+        address,
+        confirmAddress,
+        mobileNumber,
+        paymentMethod,
+        planDetails,
+      });
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -36,6 +47,7 @@ export const createOrder = async (req, res) => {
 
     // Validate addresses match
     if (address !== confirmAddress) {
+      console.error("Address mismatch:", { address, confirmAddress });
       return res.status(400).json({
         success: false,
         message: "Address and confirmation address do not match",
@@ -43,58 +55,121 @@ export const createOrder = async (req, res) => {
     }
 
     // Get user details from database
+    console.log("Fetching user from database...");
     const user = await User.findById(userId);
     if (!user) {
+      console.error("User not found:", userId);
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
+    console.log("User found:", user.email);
 
-    // Enhanced: Check if user has any active or non-expired subscription
-    const currentDate = new Date();
-    const activeSubscription = await Order.findOne({
+    // **IMPROVED: Check for ANY existing order (not just active subscriptions)**
+    console.log("Checking for existing orders...");
+    
+    // Check for any order that's not cancelled or failed
+    const existingOrder = await Order.findOne({
       userId,
-      status: { $in: ["confirmed", "active"] },
-      subscriptionEnd: { $gt: currentDate }, // Subscription hasn't expired yet
-    });
+      status: { 
+        $in: [
+          "pending", 
+          "confirmed", 
+          "active", 
+          "processing", 
+          "awaiting_payment_proof",
+          "pending_verification"
+        ] 
+      }
+    }).sort({ createdAt: -1 }); // Get the most recent order
 
-    if (activeSubscription) {
-      // Calculate days remaining for better user feedback
-      const daysRemaining = Math.ceil(
-        (activeSubscription.subscriptionEnd - currentDate) /
-          (1000 * 60 * 60 * 24)
-      );
+    if (existingOrder) {
+      console.log("Existing order found:", existingOrder._id);
+      console.log("Existing order status:", existingOrder.status);
+      
+      const currentDate = new Date();
+      let message = "";
+      let additionalData = {};
 
-      const formattedExpiryDate =
-        activeSubscription.subscriptionEnd.toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
+      // Handle different order statuses
+      switch (existingOrder.status) {
+        case "pending":
+        case "awaiting_payment_proof":
+        case "pending_verification":
+          message = "You already have a pending order. Please complete the payment or wait for verification.";
+          additionalData = {
+            existingOrderId: existingOrder._id,
+            currentStatus: existingOrder.status,
+            suggestion: "Please check your order status or contact support if you need assistance."
+          };
+          break;
+
+        case "confirmed":
+        case "active":
+          // Check if subscription is still valid
+          if (existingOrder.subscriptionEnd && existingOrder.subscriptionEnd > currentDate) {
+            const daysRemaining = Math.ceil(
+              (existingOrder.subscriptionEnd - currentDate) / (1000 * 60 * 60 * 24)
+            );
+
+            const formattedExpiryDate = existingOrder.subscriptionEnd.toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+
+            message = "You already have an active subscription";
+            additionalData = {
+              existingOrderId: existingOrder._id,
+              currentPlan: existingOrder.plan,
+              expiresOn: formattedExpiryDate,
+              daysRemaining: daysRemaining,
+              status: existingOrder.status,
+              suggestion: "You can renew your subscription when it expires or contact support for upgrade options."
+            };
+          } else {
+            // Subscription ended but order status wasn't updated
+            message = "You have a previous order that needs status update";
+            additionalData = {
+              existingOrderId: existingOrder._id,
+              currentStatus: existingOrder.status,
+              suggestion: "Please contact support to resolve this issue."
+            };
+          }
+          break;
+
+        case "processing":
+          message = "Your order is currently being processed";
+          additionalData = {
+            existingOrderId: existingOrder._id,
+            currentStatus: existingOrder.status,
+            suggestion: "Please wait for processing to complete or contact support."
+          };
+          break;
+
+        default:
+          message = "You already have an existing order";
+          additionalData = {
+            existingOrderId: existingOrder._id,
+            currentStatus: existingOrder.status,
+            suggestion: "Please check your order status before creating a new one."
+          };
+      }
 
       return res.status(400).json({
         success: false,
-        message: "You already have an active subscription",
-        data: {
-          existingOrderId: activeSubscription._id,
-          currentPlan: activeSubscription.plan,
-          expiresOn: formattedExpiryDate,
-          daysRemaining: daysRemaining,
-          status: activeSubscription.status,
-          // Suggest renewal instead of new purchase
-          suggestion:
-            "You can renew your subscription when it expires or contact support for upgrade options.",
-        },
+        message: message,
+        data: additionalData
       });
     }
 
-    // Check if user has an expired subscription that can be renewed
-    const expiredOrder = await Order.findOne({
+    // **NEW: Also check for recently cancelled or expired orders that can be renewed**
+    console.log("Checking for expired or cancelled orders that can be renewed...");
+    const recentOrder = await Order.findOne({
       userId,
-      status: "expired",
-      subscriptionEnd: { $lt: currentDate }, // Subscription has expired
-    }).sort({ subscriptionEnd: -1 }); // Get the most recent expired order
+      status: { $in: ["expired", "cancelled"] }
+    }).sort({ createdAt: -1 });
 
     // Calculate subscription dates
     let subscriptionStart = new Date();
@@ -103,20 +178,26 @@ export const createOrder = async (req, res) => {
     // Default to 1 month
     subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
 
-    // If user has an expired subscription, continue from the expiry date
-    // This ensures no gap between subscriptions
-    if (expiredOrder) {
-      subscriptionStart = new Date(expiredOrder.subscriptionEnd);
-
-      // Prevent backdating if expired order ended long ago
-      if (subscriptionStart < currentDate) {
-        subscriptionStart = currentDate;
+    // If user has a recent expired/cancelled order, use appropriate start date
+    if (recentOrder) {
+      console.log("Recent order found for renewal:", recentOrder._id);
+      
+      // For expired orders, start from expiry date to avoid gaps
+      if (recentOrder.status === "expired" && recentOrder.subscriptionEnd) {
+        subscriptionStart = new Date(recentOrder.subscriptionEnd);
+        
+        // Prevent backdating if expired long ago
+        if (subscriptionStart < currentDate) {
+          subscriptionStart = currentDate;
+        }
+        
+        subscriptionEnd = new Date(subscriptionStart);
+        subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
       }
-
-      subscriptionEnd = new Date(subscriptionStart);
-      subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+      // For cancelled orders, start from current date
     }
 
+    console.log("Creating new order...");
     // Create new order with user details from database
     const newOrder = new Order({
       userId,
@@ -136,18 +217,18 @@ export const createOrder = async (req, res) => {
     });
 
     // Save order to database
+    console.log("Saving order to database...");
     const savedOrder = await newOrder.save();
+    console.log("Order saved successfully:", savedOrder._id);
 
-    // If online payment, initiate payment gateway process
-    if (paymentMethod === "Online") {
-      // Create order as 'pending' (waiting for proof)
-      savedOrder.status = "pending"; // or 'awaiting_payment_proof'
+    // If UPI payment, set status to pending verification
+    if (paymentMethod === "Online") { // Changed from "upi" to "Online" to match frontend
+      savedOrder.status = "pending_verification";
       await savedOrder.save();
 
       return res.status(201).json({
         success: true,
-        message:
-          "Order created successfully. Please pay using the QR code and upload payment proof.",
+        message: "Order created successfully. Please upload your payment proof for verification.",
         order: savedOrder,
       });
     }
@@ -159,6 +240,7 @@ export const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating order:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "Error creating order",

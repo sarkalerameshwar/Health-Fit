@@ -7,14 +7,20 @@ const OrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState("");
 
   const token = localStorage.getItem("adminToken");
 
-  // Fetch order details from backend
+  // ✅ Fetch order details
   const fetchOrder = async () => {
-    if (!orderId) return;
+    if (!orderId) {
+      setError("Order ID is missing");
+      setLoading(false);
+      return;
+    }
+
     if (!token) {
-      alert("You are not authenticated. Please login.");
+      setError("You are not authenticated. Please login.");
       setLoading(false);
       return;
     }
@@ -23,20 +29,28 @@ const OrderDetails = () => {
       const response = await fetch(
         `http://localhost:5000/api/orders/${orderId}`,
         {
+          method: "GET",
           headers: {
-            authorization: token, // plain token, no 'Bearer ' prefix
+            authorization: token,
+            "Content-Type": "application/json",
           },
-          credentials: "include",
         }
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
-        setOrder(data.data);
+        const orderData = data.data || data.order;
+        setOrder(orderData);
       } else {
+        setError(data.message || "Failed to fetch order details");
         setOrder(null);
       }
     } catch (error) {
-      console.error("Error fetching order:", error);
+      setError(`Error: ${error.message}`);
       setOrder(null);
     } finally {
       setLoading(false);
@@ -47,15 +61,23 @@ const OrderDetails = () => {
     fetchOrder();
   }, [orderId]);
 
-  // Handle confirming order
+  // ✅ Confirm order
   const handleConfirmOrder = async () => {
     if (!window.confirm("Are you sure you want to confirm this order?")) return;
+
     if (!token) {
       alert("You are not authenticated. Please login.");
       return;
     }
 
+    if (!order || !order._id) {
+      alert("Order data is not available.");
+      return;
+    }
+
     setUpdating(true);
+    setError("");
+
     try {
       const response = await fetch(
         `http://localhost:5000/api/orders/${order._id}/status`,
@@ -65,33 +87,64 @@ const OrderDetails = () => {
             "Content-Type": "application/json",
             authorization: token,
           },
-          body: JSON.stringify({ status: "confirmed" }),
+          body: JSON.stringify({
+            status: "confirmed",
+          }),
         }
       );
+
       const data = await response.json();
       if (data.success) {
         alert("Order confirmed successfully!");
-        setOrder(data.data);
+        fetchOrder();
       } else {
-        alert(data.message || "Failed to confirm order");
+        throw new Error(data.message || "Failed to confirm order");
       }
     } catch (error) {
-      console.error("Error confirming order:", error);
+      setError(error.message);
+      alert(`Error confirming order: ${error.message}`);
     } finally {
       setUpdating(false);
     }
   };
 
   if (loading) return <p className="p-6">Loading order details...</p>;
-  if (!order) return <p className="p-6 text-red-500">Order not found</p>;
 
-  const isConfirmed = order.status === "confirmed";
+  if (error && !order)
+    return (
+      <div className="min-h-screen overflow-y-auto">
+        <Header title="Order Details" />
+        <div className="p-6">
+          <p className="text-red-500">Error: {error}</p>
+          <button
+            onClick={fetchOrder}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+
+  if (!order)
+    return (
+      <div className="min-h-screen overflow-y-auto">
+        <Header title="Order Details" />
+        <p className="p-6 text-red-500">Order not found</p>
+      </div>
+    );
+
+  const showConfirmButton = ["pending_verification"].includes(order.status);
 
   return (
-    <div>
+    <div className="min-h-screen overflow-y-auto bg-gray-50">
       <Header title="Order Details" />
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 max-w-5xl mx-auto">
         <h2 className="text-xl font-semibold">Order ID: {order._id}</h2>
+
+        {error && (
+          <div className="p-3 bg-red-100 text-red-700 rounded">{error}</div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -122,25 +175,47 @@ const OrderDetails = () => {
             <strong>Address:</strong> {order.address}
           </div>
           <div>
-            <strong>Confirm Address:</strong> {order.confirmAddress}
-          </div>
-          <div>
             <strong>City:</strong> {order.city}
           </div>
           <div>
             <strong>Mobile:</strong> {order.mobileNumber}
           </div>
+
+          {/* ✅ UTR Number */}
+          {order.paymentMethod === "Online" && (
+            <div>
+              <strong>UTR Number:</strong> {order.utrNumber || "-"}
+            </div>
+          )}
+
+          {/* ✅ Payment Screenshot */}
+          {order.paymentMethod === "Online" && (
+            <div className="md:col-span-2">
+              <strong>Payment Screenshot:</strong>
+              {order.paymentScreenshot ? (
+                <a
+                  href={order.paymentScreenshot}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mt-2"
+                >
+                  <img
+                    src={order.paymentScreenshot}
+                    alt="Payment Proof"
+                    className="w-64 h-auto border rounded shadow"
+                  />
+                </a>
+              ) : (
+                <span className="ml-2">Not uploaded</span>
+              )}
+            </div>
+          )}
+
           <div>
-            <strong>Alternate Mobile:</strong> {order.alternetNumber || "-"}
-          </div>
-          <div>
-            <strong>Payment Method:</strong> {order.paymentMethod}
-          </div>
-          <div>
-            <strong>Status:</strong>
+            <strong>Status:</strong>{" "}
             <span
               className={`px-2 py-1 rounded ${
-                isConfirmed
+                order.status === "confirmed"
                   ? "bg-green-100 text-green-800"
                   : "bg-yellow-100 text-yellow-800"
               }`}
@@ -148,42 +223,23 @@ const OrderDetails = () => {
               {order.status}
             </span>
           </div>
-
-          {order.paymentMethod === "Online" && (
-            <>
-              <div>
-                <strong>UTR Number:</strong> {order.utrNumber || "-"}
-              </div>
-              <div>
-                <strong>Payment Screenshot:</strong>
-                {order.paymentScreenshot ? (
-                  <a
-                    href={order.paymentScreenshot}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={order.paymentScreenshot}
-                      alt="Payment"
-                      className="w-48 border mt-2"
-                    />
-                  </a>
-                ) : (
-                  <span> Not uploaded </span>
-                )}
-              </div>
-            </>
-          )}
         </div>
 
-        {!isConfirmed && (
-          <button
-            onClick={handleConfirmOrder}
-            disabled={updating}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {updating ? "Confirming..." : "Confirm Order"}
-          </button>
+        {showConfirmButton && (
+          <div className="mt-6 p-4 border rounded-lg bg-blue-50">
+            <h3 className="font-semibold text-lg mb-2">Confirm Order</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              This order is awaiting verification. Click the button below to
+              confirm and activate the subscription.
+            </p>
+            <button
+              onClick={handleConfirmOrder}
+              disabled={updating}
+              className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-medium"
+            >
+              {updating ? "Confirming..." : "Confirm Order"}
+            </button>
+          </div>
         )}
       </div>
     </div>

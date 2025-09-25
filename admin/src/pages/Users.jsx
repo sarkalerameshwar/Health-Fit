@@ -12,7 +12,7 @@ const Users = () => {
         const token = localStorage.getItem("adminToken");
         if (!token) throw new Error("No token found. Please login.");
 
-        const response = await fetch("http://localhost:5000/api/user", {
+        const response = await fetch("http://localhost:5000/api/user/all", {
           headers: {
             authorization: token, // plain token, no 'Bearer ' prefix
           },

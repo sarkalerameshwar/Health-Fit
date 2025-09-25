@@ -1,37 +1,12 @@
+// lib/checkout.ts
 export interface ShippingAddress {
-  phone: string
   address: string
   area: string
+  confirmAddress: string
   city: string
-  confirmAddress?: string
-  mobileNumber?: string
+  mobileNumber: string
   alternateNumber?: string
 }
-
-export interface PaymentMethod {
-  id: string
-  type: "upi" | "Cash On Delivery"
-  name: string
-  icon: string
-  description: string
-}
-
-export const paymentMethods: PaymentMethod[] = [
-  {
-    id: "upi",
-    type: "upi",
-    name: "UPI",
-    icon: "📱",
-    description: "Google Pay, PhonePe, Paytm",
-  },
-  {
-    id: "Cash On Delivery",
-    type: "Cash On Delivery",
-    name: "Cash on delivery",
-    icon: "💰",
-    description: "Pay when you receive your order",
-  },
-]
 
 export interface SelectedProduct {
   id: string
@@ -43,29 +18,52 @@ export interface SelectedProduct {
 
 export interface SubscriptionPlan {
   id?: string
-  name?: string
-  description?: string
-  price?: number
+  name: string
+  price: number
+  billingCycle: string
+  features: string[]
 }
 
 export interface OrderSummary {
-  subscriptionPlan?: SubscriptionPlan | null
+  subscriptionPlan: SubscriptionPlan
   selectedProducts: SelectedProduct[]
   subtotal: number
   shipping: number
   tax: number
   total: number
-  isSubscription?: boolean
-  billingCycle?: "month"
 }
+
+export interface PaymentMethod {
+  id: string
+  type: "UPI" | "COD"
+  name: string
+  icon: string
+  description: string
+}
+
+export const paymentMethods: PaymentMethod[] = [
+  {
+    id: "UPI",
+    type: "UPI", 
+    name: "UPI Payment",
+    icon: "📱",
+    description: "Google Pay, PhonePe, Paytm",
+  },
+  {
+    id: "COD",
+    type: "COD",
+    name: "Cash on Delivery",
+    icon: "💰",
+    description: "Pay when you receive your order",
+  },
+]
 
 export interface OrderPayload {
   orderSummary: OrderSummary
   shippingAddress: ShippingAddress
-  paymentMethod: string
-  upiId?: string
-  upiScreenshot?: string
-  upiUTR?: string
+  paymentMethod: string // "COD" or "UPI"
+  UPIScreenshot?: File // only for UPI
+  UPIUTR?: string // only for UPI
   orderId?: string
   timestamp?: number
 }
@@ -73,41 +71,50 @@ export interface OrderPayload {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api"
 
 /**
- * Create a new order
+ * Create a new order (COD or UPI)
  */
 export async function createOrder(orderPayload: OrderPayload) {
   const token = localStorage.getItem("token")
-  const user = JSON.parse(localStorage.getItem("user") || "{}") // assume user info stored in localStorage
-  if (!token) throw new Error("User not authenticated. Please log in to place an order.")
+  const user = JSON.parse(localStorage.getItem("user") || "{}")
+  
+  if (!token) throw new Error("User not authenticated.")
+  if (!user._id) throw new Error("User data missing.")
 
-  // Calculate subscription dates
-  const subscriptionStart = new Date()
-  const subscriptionEnd = new Date()
-  subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1) // 1-month subscription
+  // Required field validation based on schema
+  if (!orderPayload.shippingAddress.address || 
+      !orderPayload.shippingAddress.confirmAddress ||
+      !orderPayload.shippingAddress.city ||
+      !orderPayload.shippingAddress.mobileNumber) {
+    throw new Error("Address, confirm address, city, and mobile number are required.")
+  }
+
+  // Map frontend payment method to backend expected values
+  const backendPaymentMethod = orderPayload.paymentMethod === "UPI" ? "Online" : "Cash On Delivery"
 
   const backendPayload = {
     userId: user._id,
-    name: user.name,
+    name: user.username || user.name,
     email: user.email,
-    plan: orderPayload.orderSummary.subscriptionPlan?.name || "Unknown Plan",
+    plan: orderPayload.orderSummary.subscriptionPlan.name,
     planDetails: {
-      price: orderPayload.orderSummary.subscriptionPlan?.price || 0,
-      billingCycle: orderPayload.orderSummary.subscriptionPlan?.billingCycle || "monthly",
-      features: (orderPayload.orderSummary.subscriptionPlan as any)?.features || [],
+      price: orderPayload.orderSummary.subscriptionPlan.price,
+      billingCycle: orderPayload.orderSummary.subscriptionPlan.billingCycle,
+      features: orderPayload.orderSummary.subscriptionPlan.features,
     },
-    subscriptionStart,
-    subscriptionEnd,
-    address: orderPayload.shippingAddress.address || "",
-    confirmAddress: orderPayload.shippingAddress.confirmAddress || "",
-    city: orderPayload.shippingAddress.city || "Nanded",
-    mobileNumber: orderPayload.shippingAddress.mobileNumber || "",
-    alternetNumber: orderPayload.shippingAddress.alternateNumber || "",
-    paymentMethod: orderPayload.paymentMethod,
-    upiId: orderPayload.upiId,
-    upiUTR: orderPayload.upiUTR,
+    address: orderPayload.shippingAddress.address,
+    confirmAddress: orderPayload.shippingAddress.confirmAddress,
+    city: orderPayload.shippingAddress.city,
+    mobileNumber: orderPayload.shippingAddress.mobileNumber,
+    alternetNumber: orderPayload.shippingAddress.alternateNumber || null,
+    paymentMethod: backendPaymentMethod, // Mapped value
     timestamp: orderPayload.timestamp || Date.now(),
   }
 
+  console.log('Creating order with payload:', backendPayload)
+  console.log('Frontend payment method:', orderPayload.paymentMethod)
+  console.log('Backend payment method:', backendPaymentMethod)
+
+  // 1️⃣ Create Order
   const response = await fetch(`${API_BASE_URL}/orders/create`, {
     method: "POST",
     headers: {
@@ -119,40 +126,83 @@ export async function createOrder(orderPayload: OrderPayload) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(
-      `Failed to create order: ${response.status} ${response.statusText} - ${
-        errorData.message || "Unknown error"
-      }`
-    )
+    console.error('Order creation failed:', errorData)
+    throw new Error(`Failed to create order: ${errorData.message || response.statusText}`)
   }
 
-  return response.json()
+  const orderResult = await response.json()
+  const orderId = orderResult.order?._id || orderResult.orderId || orderResult._id || orderResult.data?._id
+  
+  if (!orderId) {
+    console.error('Order ID not found in response:', orderResult)
+    throw new Error("Order ID not returned from backend.")
+  }
+
+  console.log('Order created successfully, ID:', orderId)
+
+  // 2️⃣ If UPI (Online), upload proof
+  if (
+    orderPayload.paymentMethod === "UPI" &&
+    orderPayload.UPIScreenshot &&
+    orderPayload.UPIUTR
+  ) {
+    console.log('Uploading UPI payment proof...')
+    await uploadPaymentProof(orderPayload.UPIScreenshot, orderPayload.UPIUTR, orderId)
+  }
+
+  return orderResult
 }
 
-
 /**
- * Upload payment proof (uses email from localStorage)
- * @param file - Payment screenshot
- * @param upiUTR - UPI transaction reference
+ * Upload UPI payment proof and update order status to pending_verification
  */
-export async function uploadPaymentProof(file: File, upiUTR: string) {
-  const email = localStorage.getItem("userEmail")
-  if (!email) throw new Error("User email not found in localStorage.")
-
-  const formData = new FormData()
-  formData.append("email", email)
-  formData.append("paymentScreenshot", file)
-  formData.append("upiUTR", upiUTR)
-
-  const response = await fetch(`${API_BASE_URL}/orders/upload-payment-proof`, {
-    method: "POST",
-    body: formData,
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Failed to upload payment proof: ${response.status} ${response.statusText} - ${errorText}`)
+export async function uploadPaymentProof(file: File, utrNumber: string, orderId: string) {
+  const token = localStorage.getItem("token")
+  const user = JSON.parse(localStorage.getItem("user") || "{}")
+  
+  if (!token) {
+    throw new Error("User not authenticated.")
   }
 
-  return response.json()
+  if (!user._id) {
+    throw new Error("User data missing.")
+  }
+
+  const formData = new FormData()
+  formData.append("orderId", orderId)
+  formData.append("paymentScreenshot", file)
+  formData.append("utrNumber", utrNumber)
+  formData.append("userId", user._id)
+
+  // Debug: Log FormData contents
+  console.log('FormData entries:')
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value)
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/payments/upload-payment-proof`, {
+      method: "POST",
+      headers: {
+        Authorization: token,
+      },
+      body: formData,
+    })
+
+    console.log('Upload response status:', response.status)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Upload failed with response:', errorText)
+      throw new Error(`Failed to upload payment proof: ${response.status} ${response.statusText} - ${errorText}`)
+    }
+
+    const result = await response.json()
+    console.log('Upload successful:', result)
+    return result
+
+  } catch (error) {
+    console.error('Error uploading payment proof:', error)
+    throw error
+  }
 }

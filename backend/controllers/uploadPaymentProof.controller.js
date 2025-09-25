@@ -14,17 +14,19 @@ cloudinary.v2.config({
 
 export const uploadPaymentProof = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { orderId, utrNumber } = req.body;
+    // Get userId from request body instead of req.user
+    const { orderId, utrNumber, userId } = req.body;
 
     // Validate required fields
-    if (!orderId || !utrNumber || !req.file) {
+    if (!orderId || !utrNumber || !req.file || !userId) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields (orderId, utrNumber, or screenshot)'
+        message: 'Missing required fields (orderId, utrNumber, userId, or screenshot)'
       });
     }
 
+    console.log('Received upload request:', { orderId, utrNumber, userId, file: req.file });
+    
     // Upload to Cloudinary from memory buffer
     const streamUpload = (buffer) => {
       return new Promise((resolve, reject) => {
@@ -41,13 +43,13 @@ export const uploadPaymentProof = async (req, res) => {
 
     const result = await streamUpload(req.file.buffer);
 
-    // ✅ FIX: only check orderId, then optionally check ownership
+    // Find order by ID
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // Optional: ensure the logged-in user owns the order
+    // Ensure the user owns the order
     if (order.userId.toString() !== userId.toString()) {
       return res.status(403).json({ success: false, message: 'You are not authorized to upload proof for this order' });
     }

@@ -345,4 +345,21 @@ const getAllUsers = async (req, res) => {
   }
 }
 
-export { signup, verifyOtp, login, forgotPassword, verifyResetPasswordOtp, resendResetPasswordOtp, getAllUsers };
+const getUserById = async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming req.user is set by auth middleware
+    const user = await User.findById(userId).select('-password -otp -otpExpiry -resetPasswordOtp -resetPasswordOtpExpiry'); // Exclude sensitive fields
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    } 
+    res.status(200).json({ user });
+  } catch (error) {
+
+    console.error("Get user by ID error:", error);
+
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+}
+
+export { signup, verifyOtp, login, forgotPassword, verifyResetPasswordOtp, resendResetPasswordOtp, getAllUsers, getUserById };

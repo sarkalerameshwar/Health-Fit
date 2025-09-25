@@ -29,7 +29,7 @@ export default function CheckoutSuccessPage() {
           return
         }
 
-        const res = await fetch(`${API_BASE_URL}/orders/${userId}`, {
+        const res = await fetch(`${API_BASE_URL}/orders/users/${userId}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: token,
