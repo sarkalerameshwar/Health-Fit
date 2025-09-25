@@ -9,7 +9,16 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, XCircle, AlertCircle, Calendar, CreditCard, MapPin, User } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+  AlertCircle,
+  Calendar,
+  CreditCard,
+  MapPin,
+  User,
+} from "lucide-react";
 
 type User = {
   _id: string;
@@ -39,7 +48,7 @@ export default function UserDashboard() {
         }
 
         const parsedUser = JSON.parse(storedUser);
-        const userId = parsedUser._id || parsedUser.id;
+        const userId = parsedUser.userId; // <-- use userId, not _id or id
 
         if (!userId) {
           setError("Invalid user data");
@@ -51,7 +60,7 @@ export default function UserDashboard() {
         const userRes = await fetch(`http://localhost:5000/api/user`, {
           method: "GET",
           headers: {
-            "Authorization": token,
+            Authorization: token,
             "Content-Type": "application/json",
           },
         });
@@ -61,7 +70,7 @@ export default function UserDashboard() {
         }
 
         const userData = await userRes.json();
-        
+
         // Handle user response
         if (userData.user) {
           setUser(userData.user);
@@ -79,7 +88,7 @@ export default function UserDashboard() {
           {
             method: "GET",
             headers: {
-              "Authorization": token,
+              Authorization: token,
               "Content-Type": "application/json",
             },
           }
@@ -93,7 +102,6 @@ export default function UserDashboard() {
           console.warn("Orders API failed:", orderRes.status);
           setOrders(null);
         }
-
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "Failed to load data");
@@ -108,18 +116,26 @@ export default function UserDashboard() {
   // Extract orders from different response structures
   const getOrdersArray = () => {
     if (!orders) return [];
-    
+
     if (Array.isArray(orders)) return orders;
     if (orders.orders && Array.isArray(orders.orders)) return orders.orders;
-    if (orders.data && orders.data.orders && Array.isArray(orders.data.orders)) return orders.data.orders;
+    if (orders.data && orders.data.orders && Array.isArray(orders.data.orders))
+      return orders.data.orders;
     if (orders.data && Array.isArray(orders.data)) return orders.data;
     if (orders._id || orders.plan || orders.userId) return [orders];
-    if (orders.success && orders.data && Array.isArray(orders.data)) return orders.data;
-    
-    const orderFields = ['plan', 'userId', 'subscriptionStart', 'paymentMethod', 'address'];
-    const hasOrderFields = orderFields.some(field => orders[field]);
+    if (orders.success && orders.data && Array.isArray(orders.data))
+      return orders.data;
+
+    const orderFields = [
+      "plan",
+      "userId",
+      "subscriptionStart",
+      "paymentMethod",
+      "address",
+    ];
+    const hasOrderFields = orderFields.some((field) => orders[field]);
     if (hasOrderFields) return [orders];
-    
+
     return [];
   };
 
@@ -142,9 +158,7 @@ export default function UserDashboard() {
             <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
             <p className="text-lg font-semibold text-red-600 mb-2">Error</p>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </CardContent>
       </Card>
@@ -156,9 +170,11 @@ export default function UserDashboard() {
       {/* Welcome Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.username || 'User'}!
+          Welcome back, {user?.username || "User"}!
         </h1>
-        <p className="text-gray-600">Manage your account and subscription details</p>
+        <p className="text-gray-600">
+          Manage your account and subscription details
+        </p>
       </div>
 
       {/* User Profile Section */}
@@ -175,47 +191,61 @@ export default function UserDashboard() {
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Full Name</p>
-                  <p className="text-lg font-semibold">{user?.username || 'Not provided'}</p>
+                  <p className="text-lg font-semibold">
+                    {user?.username || "Not provided"}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Email Address</p>
-                  <p className="text-lg">{user?.email || 'Not provided'}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Email Address
+                  </p>
+                  <p className="text-lg">{user?.email || "Not provided"}</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Account Status</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Account Status
+                  </p>
                   <div className="flex items-center mt-2">
                     {user?.ifVerified ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-green-600 font-medium">Verified</span>
+                        <span className="text-green-600 font-medium">
+                          Verified
+                        </span>
                       </>
                     ) : (
                       <>
                         <AlertCircle className="h-4 w-4 text-orange-500 mr-2" />
-                        <span className="text-orange-600 font-medium">Pending Verification</span>
+                        <span className="text-orange-600 font-medium">
+                          Pending Verification
+                        </span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Member Since</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Member Since
+                  </p>
                   <p className="text-lg font-semibold">
-                    {user?.date ? new Date(user.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    }) : 'Not available'}
+                    {user?.date
+                      ? new Date(user.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Not available"}
                   </p>
                 </div>
               </div>
@@ -231,7 +261,9 @@ export default function UserDashboard() {
             <CreditCard className="h-5 w-5" />
             <span>Subscription Details</span>
           </CardTitle>
-          <CardDescription>Your current plan and billing information</CardDescription>
+          <CardDescription>
+            Your current plan and billing information
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           {ordersList.length === 0 ? (
@@ -239,8 +271,12 @@ export default function UserDashboard() {
               <div className="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
                 <CreditCard className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">No Active Subscription</h3>
-              <p className="text-gray-500 mb-8">Get started by choosing a plan that works for you.</p>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                No Active Subscription
+              </h3>
+              <p className="text-gray-500 mb-8">
+                Get started by choosing a plan that works for you.
+              </p>
               <Button size="lg">Browse Plans</Button>
             </div>
           ) : (
@@ -255,17 +291,17 @@ export default function UserDashboard() {
 // Subscription details component
 const SubscriptionDetailsCard = ({ order }: { order: any }) => {
   const getStatusIcon = (status: string) => {
-    const s = (status || 'pending').toLowerCase();
+    const s = (status || "pending").toLowerCase();
     switch (s) {
-      case 'active':
-      case 'confirmed':
+      case "active":
+      case "confirmed":
         return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'pending':
-      case 'pending_verification':
+      case "pending":
+      case "pending_verification":
         return <Clock className="h-6 w-6 text-orange-500" />;
-      case 'cancelled':
-      case 'failed':
-      case 'expired':
+      case "cancelled":
+      case "failed":
+      case "expired":
         return <XCircle className="h-6 w-6 text-red-500" />;
       default:
         return <AlertCircle className="h-6 w-6 text-gray-500" />;
@@ -273,32 +309,32 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
   };
 
   const getStatusColor = (status: string) => {
-    const s = (status || 'pending').toLowerCase();
+    const s = (status || "pending").toLowerCase();
     switch (s) {
-      case 'active':
-      case 'confirmed':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'pending':
-      case 'pending_verification':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'cancelled':
-      case 'failed':
-      case 'expired':
-        return 'bg-red-50 text-red-700 border-red-200';
+      case "active":
+      case "confirmed":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "pending":
+      case "pending_verification":
+        return "bg-orange-50 text-orange-700 border-orange-200";
+      case "cancelled":
+      case "failed":
+      case "expired":
+        return "bg-red-50 text-red-700 border-red-200";
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
-  const planName = order.plan || 'Subscription Plan';
-  const price = order.planDetails?.price || '0';
-  const billingCycle = order.planDetails?.billingCycle || 'monthly';
+  const planName = order.plan || "Subscription Plan";
+  const price = order.planDetails?.price || "0";
+  const billingCycle = order.planDetails?.billingCycle || "monthly";
   const features = order.planDetails?.features || [];
-  const status = order.status || 'pending';
+  const status = order.status || "pending";
   const startDate = order.subscriptionStart;
   const endDate = order.subscriptionEnd;
   const orderId = order._id;
-  const paymentMethod = order.paymentMethod || 'Not specified';
+  const paymentMethod = order.paymentMethod || "Not specified";
   const utrNumber = order.utrNumber;
   const address = order.address;
   const city = order.city;
@@ -325,7 +361,11 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
           {getStatusIcon(status)}
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{planName}</h2>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border mt-2 ${getStatusColor(status)}`}>
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border mt-2 ${getStatusColor(
+                status
+              )}`}
+            >
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </div>
           </div>
@@ -344,12 +384,14 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
               <div className="flex items-center space-x-3">
                 <Calendar className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="text-sm font-medium text-green-800">Started On</p>
+                  <p className="text-sm font-medium text-green-800">
+                    Started On
+                  </p>
                   <p className="text-lg font-semibold text-green-900">
-                    {new Date(startDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(startDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </p>
                 </div>
@@ -364,21 +406,27 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
                 <div>
                   <p className="text-sm font-medium text-red-800">Expires On</p>
                   <p className="text-lg font-semibold text-red-900">
-                    {new Date(endDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(endDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </p>
                   {daysRemaining !== null && (
-                    <p className={`text-sm font-medium ${
-                      daysRemaining > 30 ? 'text-green-600' : 
-                      daysRemaining > 7 ? 'text-orange-600' : 
-                      'text-red-600'
-                    }`}>
-                      {daysRemaining > 0 ? `${daysRemaining} days left` : 
-                       daysRemaining === 0 ? 'Expires today' : 
-                       `Expired ${Math.abs(daysRemaining)} days ago`}
+                    <p
+                      className={`text-sm font-medium ${
+                        daysRemaining > 30
+                          ? "text-green-600"
+                          : daysRemaining > 7
+                          ? "text-orange-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {daysRemaining > 0
+                        ? `${daysRemaining} days left`
+                        : daysRemaining === 0
+                        ? "Expires today"
+                        : `Expired ${Math.abs(daysRemaining)} days ago`}
                     </p>
                   )}
                 </div>
@@ -391,7 +439,9 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
       {/* Plan Features */}
       {features && features.length > 0 && (
         <div className="p-6 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">What's Included</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            What's Included
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {features.map((feature: string, idx: number) => (
               <div key={idx} className="flex items-center space-x-3">
@@ -407,20 +457,24 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Order Details */}
         <div className="p-6 border rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Order Information
+          </h3>
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">Order ID:</span>
-              <span className="text-sm font-mono font-medium">{orderId || 'N/A'}</span>
+              <span className="text-sm font-mono font-medium">
+                {orderId || "N/A"}
+              </span>
             </div>
             {createdAt && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Order Date:</span>
                 <span className="text-sm font-medium">
-                  {new Date(createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
+                  {new Date(createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
                   })}
                 </span>
               </div>
@@ -432,7 +486,9 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
             {utrNumber && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">UTR:</span>
-                <span className="text-sm font-mono font-medium">{utrNumber}</span>
+                <span className="text-sm font-mono font-medium">
+                  {utrNumber}
+                </span>
               </div>
             )}
           </div>
@@ -441,7 +497,9 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
         {/* Contact & Address */}
         {(address || city || mobile) && (
           <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Contact Information
+            </h3>
             <div className="space-y-3">
               {mobile && (
                 <div className="flex justify-between">
@@ -453,7 +511,8 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
                 <div>
                   <span className="text-sm text-gray-500">Address:</span>
                   <p className="text-sm font-medium mt-1">
-                    {address}{city && address ? `, ${city}` : city}
+                    {address}
+                    {city && address ? `, ${city}` : city}
                   </p>
                 </div>
               )}
@@ -465,7 +524,9 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
       {/* Payment Screenshot */}
       {paymentScreenshot && (
         <div className="p-6 border rounded-lg text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Confirmation</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Payment Confirmation
+          </h3>
           <img
             src={paymentScreenshot}
             alt="Payment confirmation"
@@ -473,8 +534,6 @@ const SubscriptionDetailsCard = ({ order }: { order: any }) => {
           />
         </div>
       )}
-
-     
     </div>
   );
 };

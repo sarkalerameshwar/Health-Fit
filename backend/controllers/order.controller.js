@@ -2,8 +2,20 @@
 import Order from "../models/order.model.js";
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
+import cron from "node-cron";
 
-// Create a new order
+// Utility function to calculate exact 30-day subscription
+const calculateSubscriptionDates = (startDate = new Date()) => {
+  const subscriptionStart = new Date(startDate);
+  const subscriptionEnd = new Date(subscriptionStart);
+  
+  // Add exactly 30 days (not 1 month)
+  subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+  
+  return { subscriptionStart, subscriptionEnd };
+};
+
+// Create a new order with proper 30-day expiry
 export const createOrder = async (req, res) => {
   const userId = req.user._id;
 
@@ -31,14 +43,7 @@ export const createOrder = async (req, res) => {
       !paymentMethod ||
       !planDetails
     ) {
-      console.error("Missing required fields:", {
-        plan,
-        address,
-        confirmAddress,
-        mobileNumber,
-        paymentMethod,
-        planDetails,
-      });
+      console.error("Missing required fields");
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -47,29 +52,22 @@ export const createOrder = async (req, res) => {
 
     // Validate addresses match
     if (address !== confirmAddress) {
-      console.error("Address mismatch:", { address, confirmAddress });
       return res.status(400).json({
         success: false,
         message: "Address and confirmation address do not match",
       });
     }
 
-    // Get user details from database
-    console.log("Fetching user from database...");
+    // Get user details
     const user = await User.findById(userId);
     if (!user) {
-      console.error("User not found:", userId);
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
-    console.log("User found:", user.email);
 
-    // **IMPROVED: Check for ANY existing order (not just active subscriptions)**
-    console.log("Checking for existing orders...");
-    
-    // Check for any order that's not cancelled or failed
+    // Check for existing active/pending orders
     const existingOrder = await Order.findOne({
       userId,
       status: { 
@@ -82,17 +80,13 @@ export const createOrder = async (req, res) => {
           "pending_verification"
         ] 
       }
-    }).sort({ createdAt: -1 }); // Get the most recent order
+    }).sort({ createdAt: -1 });
 
     if (existingOrder) {
-      console.log("Existing order found:", existingOrder._id);
-      console.log("Existing order status:", existingOrder.status);
-      
       const currentDate = new Date();
       let message = "";
       let additionalData = {};
 
-      // Handle different order statuses
       switch (existingOrder.status) {
         case "pending":
         case "awaiting_payment_proof":
@@ -101,51 +95,25 @@ export const createOrder = async (req, res) => {
           additionalData = {
             existingOrderId: existingOrder._id,
             currentStatus: existingOrder.status,
-            suggestion: "Please check your order status or contact support if you need assistance."
           };
           break;
 
         case "confirmed":
         case "active":
-          // Check if subscription is still valid
           if (existingOrder.subscriptionEnd && existingOrder.subscriptionEnd > currentDate) {
             const daysRemaining = Math.ceil(
               (existingOrder.subscriptionEnd - currentDate) / (1000 * 60 * 60 * 24)
             );
 
-            const formattedExpiryDate = existingOrder.subscriptionEnd.toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            });
-
             message = "You already have an active subscription";
             additionalData = {
               existingOrderId: existingOrder._id,
               currentPlan: existingOrder.plan,
-              expiresOn: formattedExpiryDate,
+              expiresOn: existingOrder.subscriptionEnd.toLocaleDateString("en-IN"),
               daysRemaining: daysRemaining,
               status: existingOrder.status,
-              suggestion: "You can renew your subscription when it expires or contact support for upgrade options."
-            };
-          } else {
-            // Subscription ended but order status wasn't updated
-            message = "You have a previous order that needs status update";
-            additionalData = {
-              existingOrderId: existingOrder._id,
-              currentStatus: existingOrder.status,
-              suggestion: "Please contact support to resolve this issue."
             };
           }
-          break;
-
-        case "processing":
-          message = "Your order is currently being processed";
-          additionalData = {
-            existingOrderId: existingOrder._id,
-            currentStatus: existingOrder.status,
-            suggestion: "Please wait for processing to complete or contact support."
-          };
           break;
 
         default:
@@ -153,52 +121,44 @@ export const createOrder = async (req, res) => {
           additionalData = {
             existingOrderId: existingOrder._id,
             currentStatus: existingOrder.status,
-            suggestion: "Please check your order status before creating a new one."
           };
       }
 
-      return res.status(400).json({
-        success: false,
-        message: message,
-        data: additionalData
-      });
-    }
-
-    // **NEW: Also check for recently cancelled or expired orders that can be renewed**
-    console.log("Checking for expired or cancelled orders that can be renewed...");
-    const recentOrder = await Order.findOne({
-      userId,
-      status: { $in: ["expired", "cancelled"] }
-    }).sort({ createdAt: -1 });
-
-    // Calculate subscription dates
-    let subscriptionStart = new Date();
-    let subscriptionEnd = new Date();
-
-    // Default to 1 month
-    subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
-
-    // If user has a recent expired/cancelled order, use appropriate start date
-    if (recentOrder) {
-      console.log("Recent order found for renewal:", recentOrder._id);
-      
-      // For expired orders, start from expiry date to avoid gaps
-      if (recentOrder.status === "expired" && recentOrder.subscriptionEnd) {
-        subscriptionStart = new Date(recentOrder.subscriptionEnd);
-        
-        // Prevent backdating if expired long ago
-        if (subscriptionStart < currentDate) {
-          subscriptionStart = currentDate;
-        }
-        
-        subscriptionEnd = new Date(subscriptionStart);
-        subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+      if (message) {
+        return res.status(400).json({
+          success: false,
+          message: message,
+          data: additionalData
+        });
       }
-      // For cancelled orders, start from current date
     }
 
-    console.log("Creating new order...");
-    // Create new order with user details from database
+    // Calculate subscription dates - exactly 30 days from now
+    const { subscriptionStart, subscriptionEnd } = calculateSubscriptionDates();
+
+    // For renewal cases - check for expired orders
+    const recentExpiredOrder = await Order.findOne({
+      userId,
+      status: "expired"
+    }).sort({ subscriptionEnd: -1 });
+
+    // If renewing an expired subscription, start from expiry date
+    let finalSubscriptionStart = subscriptionStart;
+    if (recentExpiredOrder && recentExpiredOrder.subscriptionEnd) {
+      // Start from the expiry date of the previous subscription
+      finalSubscriptionStart = new Date(recentExpiredOrder.subscriptionEnd);
+      const { subscriptionEnd: newEnd } = calculateSubscriptionDates(finalSubscriptionStart);
+      finalSubscriptionStart = finalSubscriptionStart;
+      subscriptionEnd = newEnd;
+    }
+
+    console.log("Subscription dates:", {
+      start: finalSubscriptionStart.toISOString(),
+      end: subscriptionEnd.toISOString(),
+      durationDays: Math.round((subscriptionEnd - finalSubscriptionStart) / (1000 * 60 * 60 * 24))
+    });
+
+    // Create new order
     const newOrder = new Order({
       userId,
       name: user.name || user.username,
@@ -211,24 +171,22 @@ export const createOrder = async (req, res) => {
       alternetNumber: alternetNumber || null,
       paymentMethod,
       planDetails,
-      subscriptionStart,
+      subscriptionStart: finalSubscriptionStart,
       subscriptionEnd,
       status: paymentMethod === "Cash On Delivery" ? "confirmed" : "pending",
     });
 
-    // Save order to database
-    console.log("Saving order to database...");
     const savedOrder = await newOrder.save();
-    console.log("Order saved successfully:", savedOrder._id);
+    console.log("Order created with 30-day subscription:", savedOrder._id);
 
-    // If UPI payment, set status to pending verification
-    if (paymentMethod === "Online") { // Changed from "upi" to "Online" to match frontend
+    // Handle payment method specific status
+    if (paymentMethod === "Online") {
       savedOrder.status = "pending_verification";
       await savedOrder.save();
 
       return res.status(201).json({
         success: true,
-        message: "Order created successfully. Please upload your payment proof for verification.",
+        message: "Order created successfully. Please upload payment proof.",
         order: savedOrder,
       });
     }
@@ -240,7 +198,6 @@ export const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating order:", error);
-    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "Error creating order",
@@ -249,30 +206,198 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Additional helper function to check subscription status
+// Automatic expiry check function (to be called by cron job)
+export const checkAndUpdateExpiredSubscriptions = async () => {
+  try {
+    const currentDate = new Date();
+    console.log(`[${currentDate.toISOString()}] Checking for expired subscriptions...`);
+
+    // Find orders that should be expired
+    const ordersToExpire = await Order.find({
+      status: { $in: ["confirmed", "active"] },
+      subscriptionEnd: { $lte: currentDate },
+      isExpired: false
+    });
+
+    console.log(`Found ${ordersToExpire.length} orders to expire`);
+
+    if (ordersToExpire.length > 0) {
+      const updateResult = await Order.updateMany(
+        {
+          _id: { $in: ordersToExpire.map(order => order._id) }
+        },
+        {
+          $set: {
+            status: "expired",
+            isExpired: true,
+            lastStatusCheck: currentDate
+          }
+        }
+      );
+
+      console.log(`Successfully expired ${updateResult.modifiedCount} orders`);
+      
+      // Log the expired orders
+      ordersToExpire.forEach(order => {
+        console.log(`Order ${order._id} expired. Was valid until: ${order.subscriptionEnd}`);
+      });
+    }
+
+    return {
+      success: true,
+      expiredCount: ordersToExpire.length,
+      message: `Expired ${ordersToExpire.length} subscriptions`
+    };
+  } catch (error) {
+    console.error("Error in expiry check:", error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Manual expiry check endpoint (for testing and manual triggers)
+// Enhanced manual expiry check with better response
+export const manualExpiryCheck = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    console.log(`Manual expiry check triggered at: ${currentDate.toISOString()}`);
+    
+    // Find orders that should be expired
+    const ordersToExpire = await Order.find({
+      status: { $in: ["confirmed", "active"] },
+      subscriptionEnd: { $lte: currentDate },
+      isExpired: false
+    }).populate("userId", "name email");
+
+    console.log(`Found ${ordersToExpire.length} orders to expire`);
+
+    let expiredOrders = [];
+    
+    if (ordersToExpire.length > 0) {
+      // Update each order individually to track which ones were expired
+      for (const order of ordersToExpire) {
+        const updatedOrder = await Order.findByIdAndUpdate(
+          order._id,
+          {
+            $set: {
+              status: "expired",
+              isExpired: true,
+              lastStatusCheck: currentDate
+            }
+          },
+          { new: true }
+        ).populate("userId", "name email");
+
+        expiredOrders.push({
+          orderId: updatedOrder._id,
+          userId: updatedOrder.userId._id,
+          userName: updatedOrder.userId.name,
+          plan: updatedOrder.plan,
+          subscriptionEnd: updatedOrder.subscriptionEnd,
+          expiredAt: currentDate
+        });
+
+        console.log(`Expired order ${order._id} for user ${updatedOrder.userId.name}`);
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `Successfully expired ${expiredOrders.length} order(s)`,
+        data: {
+          expiredCount: expiredOrders.length,
+          expiredOrders: expiredOrders,
+          checkTime: currentDate,
+          summary: {
+            totalChecked: ordersToExpire.length,
+            expired: expiredOrders.length,
+            noActionNeeded: 0
+          }
+        }
+      });
+    } else {
+      // No orders to expire
+      const activeOrdersCount = await Order.countDocuments({
+        status: { $in: ["confirmed", "active"] },
+        subscriptionEnd: { $gt: currentDate }
+      });
+
+      const alreadyExpiredCount = await Order.countDocuments({
+        status: "expired",
+        isExpired: true
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "No orders need to be expired at this time",
+        data: {
+          expiredCount: 0,
+          expiredOrders: [],
+          checkTime: currentDate,
+          summary: {
+            totalActiveSubscriptions: activeOrdersCount,
+            alreadyExpired: alreadyExpiredCount,
+            needingExpiry: 0,
+            noActionNeeded: activeOrdersCount + alreadyExpiredCount
+          },
+          status: "All subscriptions are up-to-date"
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error in manual expiry check:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error performing expiry check",
+      error: error.message,
+      details: "Check server logs for more information"
+    });
+  }
+};
+
+// Enhanced subscription status check
 export const checkSubscriptionStatus = async (req, res) => {
   try {
     const userId = req.user._id;
     const currentDate = new Date();
 
-    // Find active subscription
+    // First, check and update any expired subscriptions for this user
+    const userExpiredOrders = await Order.find({
+      userId,
+      status: { $in: ["confirmed", "active"] },
+      subscriptionEnd: { $lte: currentDate },
+      isExpired: false
+    });
+
+    if (userExpiredOrders.length > 0) {
+      await Order.updateMany(
+        { _id: { $in: userExpiredOrders.map(order => order._id) } },
+        { 
+          $set: { 
+            status: "expired", 
+            isExpired: true,
+            lastStatusCheck: currentDate
+          } 
+        }
+      );
+    }
+
+    // Now get the current status
     const activeSubscription = await Order.findOne({
       userId,
       status: { $in: ["confirmed", "active"] },
       subscriptionEnd: { $gt: currentDate },
     });
 
-    // Find most recent expired subscription
     const expiredSubscription = await Order.findOne({
       userId,
       status: "expired",
-      subscriptionEnd: { $lt: currentDate },
     }).sort({ subscriptionEnd: -1 });
 
-    // Find pending orders
     const pendingOrders = await Order.find({
       userId,
-      status: "pending",
+      status: { $in: ["pending", "pending_verification"] },
     });
 
     const canCreateNewOrder = !activeSubscription;
@@ -281,28 +406,30 @@ export const checkSubscriptionStatus = async (req, res) => {
       success: true,
       data: {
         canCreateNewOrder,
-        activeSubscription: activeSubscription
-          ? {
-              _id: activeSubscription._id,
-              plan: activeSubscription.plan,
-              status: activeSubscription.status,
-              subscriptionEnd: activeSubscription.subscriptionEnd,
-              daysRemaining: Math.ceil(
-                (activeSubscription.subscriptionEnd - currentDate) /
-                  (1000 * 60 * 60 * 24)
-              ),
-            }
-          : null,
-        expiredSubscription: expiredSubscription
-          ? {
-              _id: expiredSubscription._id,
-              plan: expiredSubscription.plan,
-              expiredOn: expiredSubscription.subscriptionEnd,
-            }
-          : null,
+        activeSubscription: activeSubscription ? {
+          _id: activeSubscription._id,
+          plan: activeSubscription.plan,
+          status: activeSubscription.status,
+          subscriptionStart: activeSubscription.subscriptionStart,
+          subscriptionEnd: activeSubscription.subscriptionEnd,
+          daysRemaining: Math.ceil(
+            (activeSubscription.subscriptionEnd - currentDate) / (1000 * 60 * 60 * 24)
+          ),
+          totalDuration: 30,
+          daysUsed: 30 - Math.ceil(
+            (activeSubscription.subscriptionEnd - currentDate) / (1000 * 60 * 60 * 24)
+          )
+        } : null,
+        expiredSubscription: expiredSubscription ? {
+          _id: expiredSubscription._id,
+          plan: expiredSubscription.plan,
+          expiredOn: expiredSubscription.subscriptionEnd,
+          canRenew: true
+        } : null,
         pendingOrders: pendingOrders.map((order) => ({
           _id: order._id,
           plan: order.plan,
+          status: order.status,
           createdAt: order.createdAt,
         })),
       },
@@ -316,9 +443,46 @@ export const checkSubscriptionStatus = async (req, res) => {
   }
 };
 
+// Get order with expiry information
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid order ID" });
+    }
 
+    const order = await Order.findById(id).populate("userId", "name email");
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
-// Get all orders with optional filters and pagination
+    const currentDate = new Date();
+    const isExpired = order.subscriptionEnd <= currentDate;
+    
+    // Auto-update status if expired
+    if (isExpired && !order.isExpired && order.status !== "expired") {
+      order.status = "expired";
+      order.isExpired = true;
+      order.lastStatusCheck = currentDate;
+      await order.save();
+    }
+
+    const orderWithExpiryInfo = {
+      ...order.toObject(),
+      isCurrentlyExpired: isExpired,
+      daysRemaining: isExpired ? 0 : Math.ceil(
+        (order.subscriptionEnd - currentDate) / (1000 * 60 * 60 * 24)
+      ),
+      totalDuration: 30
+    };
+
+    res.status(200).json({ success: true, data: orderWithExpiryInfo });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ success: false, message: "Error fetching order", error: error.message });
+  }
+};
+
+// ... keep your existing getOrders, updateOrderStatus, getOrdersByUserId functions
+
 export const getOrders = async (req, res) => {
   try {
     const { page = 1, limit = 10, status, userId } = req.query;
@@ -352,24 +516,6 @@ export const getOrders = async (req, res) => {
       message: "Error fetching orders",
       error: error.message,
     });
-  }
-};
-
-// Get single order by ID
-export const getOrderById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: "Invalid order ID" });
-    }
-
-    const order = await Order.findById(id).populate("userId", "name email");
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
-
-    res.status(200).json({ success: true, data: order });
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ success: false, message: "Error fetching order", error: error.message });
   }
 };
 

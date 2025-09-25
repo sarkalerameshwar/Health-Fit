@@ -42,8 +42,9 @@ export default function FeedbackPage() {
     }
 
     const user = JSON.parse(userStr);
-    const userId = user._id || user.id;
-    const { username, email } = user;
+    const userId = user.userId || user._id;
+    const username = user.username || user.name;
+    const email = user.email || user.useremail; // Support both keys
 
     if (!rating || !formData.category || !formData.feedback) {
       alert("Please fill in all required fields");
@@ -84,7 +85,9 @@ export default function FeedbackPage() {
       setFormData({ category: "", feedback: "" });
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      alert((error as Error).message || "Something went wrong. Please try again.");
+      alert(
+        (error as Error).message || "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -101,9 +104,12 @@ export default function FeedbackPage() {
             </div>
             <h1 className="text-4xl font-bold text-primary">Thank You!</h1>
             <p className="text-xl text-muted-foreground">
-              Your feedback has been submitted successfully. We appreciate your input!
+              Your feedback has been submitted successfully. We appreciate your
+              input!
             </p>
-            <Button onClick={() => setIsSuccess(false)}>Submit More Feedback</Button>
+            <Button onClick={() => setIsSuccess(false)}>
+              Submit More Feedback
+            </Button>
           </div>
         </main>
         <Footer />
@@ -116,9 +122,12 @@ export default function FeedbackPage() {
       <Header />
       <main className="container py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-balance">Share Your Feedback</h1>
+          <h1 className="text-4xl font-bold mb-4 text-balance">
+            Share Your Feedback
+          </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-pretty">
-            Your opinion matters to us. Help us improve our service by sharing your experience.
+            Your opinion matters to us. Help us improve our service by sharing
+            your experience.
           </p>
         </div>
 
@@ -126,7 +135,9 @@ export default function FeedbackPage() {
           <Card>
             <CardHeader>
               <CardTitle>Feedback Form</CardTitle>
-              <CardDescription>Tell us about your HealthFit experience</CardDescription>
+              <CardDescription>
+                Tell us about your HealthFit experience
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -141,16 +152,33 @@ export default function FeedbackPage() {
                       { value: "2", label: "Poor" },
                       { value: "1", label: "Very Poor" },
                     ].map((item) => (
-                      <div key={item.value} className="flex items-center space-x-2">
-                        <RadioGroupItem value={item.value} id={`r${item.value}`} />
-                        <Label htmlFor={`r${item.value}`} className="flex items-center gap-1">
+                      <div
+                        key={item.value}
+                        className="flex items-center space-x-2"
+                      >
+                        <RadioGroupItem
+                          value={item.value}
+                          id={`r${item.value}`}
+                        />
+                        <Label
+                          htmlFor={`r${item.value}`}
+                          className="flex items-center gap-1"
+                        >
                           <div className="flex">
                             {[...Array(parseInt(item.value))].map((_, i) => (
-                              <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                              <Star
+                                key={i}
+                                className="h-4 w-4 fill-primary text-primary"
+                              />
                             ))}
-                            {[...Array(5 - parseInt(item.value))].map((_, i) => (
-                              <Star key={i} className="h-4 w-4 text-muted-foreground" />
-                            ))}
+                            {[...Array(5 - parseInt(item.value))].map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-4 w-4 text-muted-foreground"
+                                />
+                              )
+                            )}
                           </div>
                           {item.label}
                         </Label>
@@ -164,7 +192,9 @@ export default function FeedbackPage() {
                   <Label>Feedback Category</Label>
                   <RadioGroup
                     value={formData.category}
-                    onValueChange={(value) => handleInputChange("category", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("category", value)
+                    }
                   >
                     {[
                       "Product Quality",
@@ -175,7 +205,10 @@ export default function FeedbackPage() {
                       "Other",
                     ].map((cat) => (
                       <div key={cat} className="flex items-center space-x-2">
-                        <RadioGroupItem value={cat} id={cat.replace(/\s/g, "")} />
+                        <RadioGroupItem
+                          value={cat}
+                          id={cat.replace(/\s/g, "")}
+                        />
                         <Label htmlFor={cat.replace(/\s/g, "")}>{cat}</Label>
                       </div>
                     ))}
@@ -190,13 +223,21 @@ export default function FeedbackPage() {
                     rows={6}
                     placeholder="Please share your detailed feedback, suggestions, or any issues you experienced..."
                     value={formData.feedback}
-                    onChange={(e) => handleInputChange("feedback", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("feedback", e.target.value)
+                    }
                     required
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   {isSubmitting ? "Submitting..." : "Submit Feedback"}
                 </Button>
               </form>

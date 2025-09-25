@@ -7,7 +7,9 @@ import {
   getOrders,
   getOrderById,
   updateOrderStatus,
-  getOrdersByUserId
+  getOrdersByUserId,
+  checkSubscriptionStatus,
+  manualExpiryCheck 
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
@@ -17,6 +19,9 @@ router.post('/create', protect, createOrder);
 
 // Get all orders with optional filtering
 router.get('/', admin, getOrders);
+
+// expiry check
+router.get("/expiry-check", protect, admin, manualExpiryCheck);
 
 // Get orders by user ID
 router.get('/users/:userId', getOrdersByUserId);
