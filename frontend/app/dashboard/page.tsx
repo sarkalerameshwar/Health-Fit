@@ -58,7 +58,7 @@ export default function UserDashboard() {
         }
 
         // Fetch user details
-        const userRes = await fetch(`http://localhost:5000/api/user`, {
+        const userRes = await fetch(`https://health-fit-uyi4.onrender.com/api/user`, {
           method: "GET",
           headers: {
             Authorization: token,
@@ -85,7 +85,7 @@ export default function UserDashboard() {
 
         // Fetch orders
         const orderRes = await fetch(
-          `http://localhost:5000/api/orders/users/${userId}`,
+          `https://health-fit-uyi4.onrender.com/api/orders/users/${userId}`,
           {
             method: "GET",
             headers: {

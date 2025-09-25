@@ -69,7 +69,7 @@ export interface OrderPayload {
 }
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+  "https://health-fit-uyi4.onrender.com/api";
 
 /**
  * Create a new order (COD or UPI)
