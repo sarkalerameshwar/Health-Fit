@@ -239,7 +239,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
       message: `Expired ${ordersToExpire.length} subscriptions`
     };
   } catch (error) {
-    console.error("Error in expiry check:", error);
+    // console.error("Error in expiry check:", error);
     return {
       success: false,
       error: error.message
@@ -252,7 +252,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
 export const manualExpiryCheck = async (req, res) => {
   try {
     const currentDate = new Date();
-    console.log(`Manual expiry check triggered at: ${currentDate.toISOString()}`);
+    // console.log(`Manual expiry check triggered at: ${currentDate.toISOString()}`);
     
     // Find orders that should be expired
     const ordersToExpire = await Order.find({
@@ -261,7 +261,7 @@ export const manualExpiryCheck = async (req, res) => {
       isExpired: false
     }).populate("userId", "name email");
 
-    console.log(`Found ${ordersToExpire.length} orders to expire`);
+    // console.log(`Found ${ordersToExpire.length} orders to expire`);
 
     let expiredOrders = [];
     
@@ -289,7 +289,7 @@ export const manualExpiryCheck = async (req, res) => {
           expiredAt: currentDate
         });
 
-        console.log(`Expired order ${order._id} for user ${updatedOrder.userId.name}`);
+        // console.log(`Expired order ${order._id} for user ${updatedOrder.userId.name}`);
       }
 
       return res.status(200).json({
@@ -336,7 +336,7 @@ export const manualExpiryCheck = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error in manual expiry check:", error);
+    // console.error("Error in manual expiry check:", error);
     res.status(500).json({
       success: false,
       message: "Error performing expiry check",
@@ -425,7 +425,7 @@ export const checkSubscriptionStatus = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking subscription status:", error);
+    // console.error("Error checking subscription status:", error);
     res.status(500).json({
       success: false,
       message: "Error checking subscription status",
@@ -466,7 +466,7 @@ export const getOrderById = async (req, res) => {
 
     res.status(200).json({ success: true, data: orderWithExpiryInfo });
   } catch (error) {
-    console.error("Error fetching order:", error);
+    // console.error("Error fetching order:", error);
     res.status(500).json({ success: false, message: "Error fetching order", error: error.message });
   }
 };
@@ -500,7 +500,7 @@ export const getOrders = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    // console.error("Error fetching orders:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching orders",
@@ -534,7 +534,7 @@ export const updateOrderStatus = async (req, res) => {
       data: updatedOrder,
     });
   } catch (error) {
-    console.error("Error updating order:", error);
+    // console.error("Error updating order:", error);
     res.status(500).json({ success: false, message: "Error updating order", error: error.message });
   }
 };
@@ -568,7 +568,7 @@ export const getOrdersByUserId = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching user orders:", error);
+    // console.error("Error fetching user orders:", error);
     res.status(500).json({ success: false, message: "Error fetching user orders", error: error.message });
   }
 };
