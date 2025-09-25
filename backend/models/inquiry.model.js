@@ -14,6 +14,11 @@ const inquirySchema = new mongoose.Schema({
     type: String,
     required: true
     },
+    category: {
+    type: String,
+    enum: ["General Inquiry ", "Technical", "Subscription Support", "Delivey Issues", "Billing Questions", "Product Information"],
+    default: "General Inquiry"
+    },
     subject: {
     type: String,
     required: true

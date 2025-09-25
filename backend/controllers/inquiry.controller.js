@@ -1,16 +1,25 @@
 import Inquiry from "../models/inquiry.model.js";
 
-// Add Inquiry (User sends message + optional rating)
+// Add Inquiry (User sends message + phone number)
 export const addInquiry = async (req, res) => {
   try {
     const { _id: userId, username, email } = req.user;
-    const { subject, message, rating } = req.body;
+    const { subject, message, phone, category } = req.body;
 
     if (!message) {
       return res.status(400).json({ message: "Inquiry message is required" });
     }
 
-    const inquiry = new Inquiry({ userId, username , email, subject, message });
+    const inquiry = new Inquiry({ 
+      userId, 
+      username, 
+      email, 
+      subject, 
+      message, 
+      phone, // Added phone number
+      category // Added category
+    });
+    
     await inquiry.save();
 
     res.status(201).json({

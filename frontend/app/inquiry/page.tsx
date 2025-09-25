@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,24 +16,80 @@ export default function InquiryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
     phone: "",
     subject: "",
     category: "",
     message: "",
   })
 
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null)
+
+  useEffect(() => {
+    // Get email and username from localStorage
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser)
+        setUser({
+          username: parsed.username || parsed.name || "",
+          email: parsed.email || "",
+        })
+      } catch (err) {
+        console.error("Error parsing localStorage user:", err)
+      }
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setIsSubmitting(false)
-    setIsSuccess(true)
+  e.preventDefault()
+  if (!user) {
+    alert("Please log in first.")
+    return
   }
+
+  const token = localStorage.getItem("token")
+  if (!token) {
+    alert("Please log in first.")
+    return
+  }
+
+  setIsSubmitting(true)
+
+  try {
+    const payload = {
+      name: user.username,
+      email: user.email,
+      phone: formData.phone,
+      subject: formData.subject,
+      category: formData.category,
+      message: formData.message,
+    }
+
+    const res = await fetch("http://localhost:5000/api/inquiries/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // send plain token
+        Authorization: token,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      console.error("Server error:", err)
+      throw new Error(err.message || "Failed to submit inquiry")
+    }
+
+    setIsSuccess(true)
+  } catch (error) {
+    console.error("Error submitting inquiry:", error)
+    alert("Something went wrong. Please try again.")
+  } finally {
+    setIsSubmitting(false)
+  }
+}
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value })
@@ -83,28 +138,6 @@ export default function InquiryPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
                       <Label htmlFor="phone">Phone (Optional)</Label>
                       <Input
                         id="phone"
@@ -120,12 +153,12 @@ export default function InquiryPage() {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="general">General Inquiry</SelectItem>
-                          <SelectItem value="subscription">Subscription Support</SelectItem>
-                          <SelectItem value="delivery">Delivery Issues</SelectItem>
-                          <SelectItem value="billing">Billing Questions</SelectItem>
-                          <SelectItem value="product">Product Information</SelectItem>
-                          <SelectItem value="feedback">Feedback</SelectItem>
+                          <SelectItem value="General Inquiry ">General Inquiry</SelectItem>
+                          <SelectItem value="Subscription Support">Subscription Support</SelectItem>
+                          <SelectItem value="Delivey Issues">Delivery Issues</SelectItem>
+                          <SelectItem value="Billing Questions">Billing Questions</SelectItem>
+                          <SelectItem value="Product Information">Product Information</SelectItem>
+                          <SelectItem value="Technical">Technical</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -161,6 +194,7 @@ export default function InquiryPage() {
             </Card>
           </div>
 
+          {/* Right-hand cards unchanged */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
