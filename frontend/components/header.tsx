@@ -12,21 +12,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
+import { User, Menu, X } from "lucide-react";
 
 export function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
     setIsLoggedIn(!!user);
   }, []);
 
-  // Prevent body scroll when dropdown is open
+  // Prevent body scroll when dropdown or mobile menu is open
   useEffect(() => {
-    if (isDropdownOpen) {
+    if (isDropdownOpen || isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -35,20 +36,35 @@ export function Header() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, isMobileMenuOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
     router.push("/login");
   };
 
   const handleDashboardClick = () => {
     setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
     router.push("/dashboard");
   };
+
+  const handleNavigationClick = (path: string) => {
+    setIsMobileMenuOpen(false);
+    router.push(path);
+  };
+
+  const navigationItems = [
+    { href: "/", label: "Home" },
+    { href: "/offers", label: "Offers" },
+    { href: "/products", label: "Products" },
+    { href: "/inquiry", label: "Inquiry" },
+    { href: "/feedback", label: "Feedback" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -65,14 +81,29 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6 font-medium">
-          <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-          <Link href="/offers" className="hover:text-primary transition-colors">Offers</Link>
-          <Link href="/products" className="hover:text-primary transition-colors">Products</Link>
-          <Link href="/inquiry" className="hover:text-primary transition-colors">Inquiry</Link>
-          <Link href="/feedback" className="hover:text-primary transition-colors">Feedback</Link>
+          {navigationItems.map((item) => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              className="hover:text-primary transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden rounded-full hover:bg-muted transition-colors"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
           {isLoggedIn ? (
             <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
@@ -83,22 +114,17 @@ export function Header() {
                   aria-label="User menu"
                 >
                   <User className="h-5 w-5" />
-                  {/* Online status indicator */}
-                  {/* <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span> */}
                 </Button>
               </DropdownMenuTrigger>
               
-              {/* DROPDOWN THAT ALWAYS OPENS ABOVE */}
               <DropdownMenuContent
                 align="end"
-                side="top" // Force opening above the trigger
-                sideOffset={8} // Distance from trigger
-                collisionPadding={16} // Padding from viewport edges
+                side="bottom" // Changed to bottom for better mobile behavior
+                sideOffset={8}
+                collisionPadding={16}
                 avoidCollisions={true}
                 className="w-56 rounded-lg shadow-xl border bg-background z-[100]"
-                position="popper"
                 onCloseAutoFocus={(event) => event.preventDefault()}
-                onEscapeKeyDown={() => setIsDropdownOpen(false)}
               >
                 {/* User Info Section */}
                 <div className="px-4 py-3 border-b">
@@ -155,6 +181,45 @@ export function Header() {
           )}
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b shadow-lg z-40">
+          <div className="container py-4">
+            <nav className="flex flex-col space-y-4">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => handleNavigationClick(item.href)}
+                  className="text-left py-3 px-4 hover:bg-accent rounded-lg transition-colors font-medium"
+                >
+                  {item.label}
+                </button>
+              ))}
+              
+              {/* Auth buttons for mobile when not logged in */}
+              {!isLoggedIn && (
+                <>
+                  <Button asChild variant="ghost" className="justify-start py-3 px-4 h-auto">
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button asChild className="justify-start py-3 px-4 h-auto">
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </header>
   );
 }

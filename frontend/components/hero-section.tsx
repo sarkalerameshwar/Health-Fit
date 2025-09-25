@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Leaf } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image" // Use Next.js Image component for better optimization
 
 // plain images from /public
-const DEFAULT_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg"]
+const DEFAULT_IMAGES = ["/fruit-im.jpg", "/fruit1.jpg", "/hero3.jpg"]
 
 export function HeroSection({
   images = DEFAULT_IMAGES,
@@ -59,14 +60,10 @@ export function HeroSection({
     if (pos >= count) {
       const t = setTimeout(() => {
         if (!trackRef.current) return
-        // temporarily remove transition, snap to (pos - count)
         trackRef.current.style.transition = "none"
         const snap = -(pos - count) * slidePct
         trackRef.current.style.transform = `translateX(${snap}%)`
-        // force reflow
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        trackRef.current.offsetHeight
-        // set pos to snapped value and restore transition
+        trackRef.current.offsetHeight // force reflow
         setPos((p) => p - count)
         trackRef.current.style.transition = ""
       }, 520)
@@ -80,14 +77,11 @@ export function HeroSection({
   }
   function prev() {
     if (pos === 0) {
-      // snap to tail then go to last
       if (trackRef.current) {
         trackRef.current.style.transition = "none"
         const snap = -count * slidePct
         trackRef.current.style.transform = `translateX(${snap}%)`
-        // force reflow
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        trackRef.current.offsetHeight
+        trackRef.current.offsetHeight // force reflow
         trackRef.current.style.transition = ""
         setTimeout(() => setPos(count - 1), 20)
         resetAuto()
@@ -107,7 +101,6 @@ export function HeroSection({
     autoRef.current = window.setInterval(() => setPos((p) => p + 1), autoplayMs)
   }
 
-  // detect mobile to change styling if needed
   const isMobile = slidesToShow === 1
 
   return (
@@ -140,20 +133,20 @@ export function HeroSection({
             </div>
           </div>
 
-          {/* carousel */}
+          {/* carousel - FIXED */}
           <div className="flex items-center justify-center order-first lg:order-last">
             <div className="relative w-full max-w-md lg:max-w-none">
               <div
                 className="relative overflow-hidden rounded-xl"
                 style={{
-                  // stable height on mobile using viewport width -> 16:9: height = vw * 9/16
-                  height: isMobile ? `calc(100vw * 9 / 16)` : undefined,
-                  touchAction: "pan-y",
+                  // Use consistent aspect ratio for all screen sizes
+                  aspectRatio: isMobile ? "4/3" : "16/10",
+                  maxHeight: isMobile ? "400px" : "none",
                 }}
               >
                 <div
                   ref={trackRef}
-                  className="flex transition-transform duration-500 ease-in-out will-change-transform"
+                  className="flex transition-transform duration-500 ease-in-out will-change-transform h-full"
                   style={{
                     width: `${(100 / slidesToShow) * extendedCount}%`,
                     transform: `translateX(${translate}%)`,
@@ -162,27 +155,30 @@ export function HeroSection({
                   {extended.map((src, idx) => (
                     <div
                       key={idx}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 h-full"
                       style={{ width: `${slidePct}%`, padding: 8, boxSizing: "border-box" }}
                     >
                       <div
-                        className={`relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 h-full ${
-                          isMobile ? "aspect-video" : "aspect-[16/10]"
-                        }`}
-                      >
+  className="relative overflow-hidden rounded-xl"
+  style={{
+    aspectRatio: "4/3",
+    maxHeight: "400px",
+  }}
+>
+                        {/* Use Next.js Image component with proper sizing */}
                         <img
-                          src={src}
-                          alt={`slide-${idx}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: isMobile ? "contain" : "cover", // IMPORTANT: contain on mobile
-                            objectPosition: "center",
-                            display: "block",
-                          }}
-                          draggable={false}
-                          loading={idx === 0 ? "eager" : "lazy"}
-                        />
+  src={src}
+  alt={`slide-${idx}`}
+  style={{
+    width: "100%",
+    height: "100%",
+    objectFit: "contain", // Always use contain
+    objectPosition: "center",
+    display: "block",
+  }}
+  draggable={false}
+  loading={idx === 0 ? "eager" : "lazy"}
+/>
                       </div>
                     </div>
                   ))}
@@ -221,18 +217,6 @@ export function HeroSection({
           </div>
         </div>
       </div>
-
-      {/* debug and mobile fixes */}
-      <style jsx>{`
-        /* prevent image dragging */
-        img {
-          -webkit-user-drag: none;
-          user-drag: none;
-        }
-        /* Debug helpers (remove when done):
-           .carousel-slide { outline: 1px dashed rgba(255,255,255,0.08); }
-        */
-      `}</style>
     </section>
   )
 }
