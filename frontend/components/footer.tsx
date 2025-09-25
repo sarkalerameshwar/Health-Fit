@@ -113,18 +113,18 @@ export function Footer() {
             <ul className="space-y-3 text-white">
               <li className="flex items-center space-x-2">
                 <User className="h-4 w-4" />
-                <span>Rajesh Kumar</span>
+                <span>Anuj Nandgaonkar, Rameshwar Sarkale</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <a href="tel:+919876543210" className="text-white hover:text-secondary hover:underline transition-colors">
-                  +91 98765 43210
+                <a href="tel:+917499963100" className="text-white hover:text-secondary hover:underline transition-colors">
+                  7499963100, 8080652957
                 </a>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <a href="mailto:support@healthfit.com" className="text-white hover:text-secondary hover:underline transition-colors">
-                  support@healthfit.com
+                <a href="rameshwarsarkale21@gmail.com" className="text-white hover:text-secondary hover:underline transition-colors">
+                  rameshwarsarkale21@gmail.com
                 </a>
               </li>
             </ul>
