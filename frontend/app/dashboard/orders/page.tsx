@@ -1,10 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Download, Package, Calendar, CreditCard, MapPin, AlertCircle } from "lucide-react";
+import {
+  Eye,
+  Download,
+  Package,
+  Calendar,
+  CreditCard,
+  MapPin,
+  AlertCircle,
+} from "lucide-react";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -24,27 +38,34 @@ export default function OrdersPage() {
         }
 
         const parsedUser = JSON.parse(storedUser);
-        const userId = parsedUser._id || parsedUser.id;
+        const userId = parsedUser.userId; // <-- use userId, not _id or id
 
-        const response = await fetch(`http://localhost:5000/api/orders/users/${userId}`, {
-          method: "GET",
-          headers: {
-            "Authorization": token,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `http://localhost:5000/api/orders/users/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
           console.log("Orders data:", data);
-          
+
           // Extract orders from different response structures
           let ordersArray = [];
           if (Array.isArray(data)) {
             ordersArray = data;
           } else if (data.orders && Array.isArray(data.orders)) {
             ordersArray = data.orders;
-          } else if (data.data && data.data.orders && Array.isArray(data.data.orders)) {
+          } else if (
+            data.data &&
+            data.data.orders &&
+            Array.isArray(data.data.orders)
+          ) {
             ordersArray = data.data.orders;
           } else if (data.data && Array.isArray(data.data)) {
             ordersArray = data.data;
@@ -53,8 +74,12 @@ export default function OrdersPage() {
           }
 
           // Sort orders by creation date (newest first)
-          ordersArray.sort((a, b) => new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime());
-          
+          ordersArray.sort(
+            (a, b) =>
+              new Date(b.createdAt || b.date).getTime() -
+              new Date(a.createdAt || a.date).getTime()
+          );
+
           setOrders(ordersArray);
         } else {
           setError("Failed to fetch orders");
@@ -71,51 +96,51 @@ export default function OrdersPage() {
   }, []);
 
   const getStatusInfo = (order: any) => {
-    const status = order.status || 'pending';
+    const status = order.status || "pending";
     const endDate = order.subscriptionEnd;
     const now = new Date();
-    
+
     // Check if subscription is expired
-    if (endDate && new Date(endDate) < now && status !== 'cancelled') {
+    if (endDate && new Date(endDate) < now && status !== "cancelled") {
       return {
-        status: 'expired',
-        variant: 'destructive' as const,
-        label: 'Expired'
+        status: "expired",
+        variant: "destructive" as const,
+        label: "Expired",
       };
     }
 
     switch (status.toLowerCase()) {
-      case 'active':
-      case 'confirmed':
+      case "active":
+      case "confirmed":
         return {
-          status: 'active',
-          variant: 'default' as const,
-          label: 'Active'
+          status: "active",
+          variant: "default" as const,
+          label: "Active",
         };
-      case 'pending':
-      case 'pending_verification':
+      case "pending":
+      case "pending_verification":
         return {
-          status: 'pending',
-          variant: 'secondary' as const,
-          label: 'Pending'
+          status: "pending",
+          variant: "secondary" as const,
+          label: "Pending",
         };
-      case 'cancelled':
+      case "cancelled":
         return {
-          status: 'cancelled',
-          variant: 'destructive' as const,
-          label: 'Cancelled'
+          status: "cancelled",
+          variant: "destructive" as const,
+          label: "Cancelled",
         };
-      case 'failed':
+      case "failed":
         return {
-          status: 'failed',
-          variant: 'destructive' as const,
-          label: 'Failed'
+          status: "failed",
+          variant: "destructive" as const,
+          label: "Failed",
         };
       default:
         return {
-          status: 'unknown',
-          variant: 'outline' as const,
-          label: status.charAt(0).toUpperCase() + status.slice(1)
+          status: "unknown",
+          variant: "outline" as const,
+          label: status.charAt(0).toUpperCase() + status.slice(1),
         };
     }
   };
@@ -148,7 +173,9 @@ export default function OrdersPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
-          <p className="text-muted-foreground">View and track all your subscription orders.</p>
+          <p className="text-muted-foreground">
+            View and track all your subscription orders.
+          </p>
         </div>
         <Card>
           <CardContent className="p-6">
@@ -171,14 +198,20 @@ export default function OrdersPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
-          <p className="text-muted-foreground">View and track all your subscription orders.</p>
+          <p className="text-muted-foreground">
+            View and track all your subscription orders.
+          </p>
         </div>
         <Card>
           <CardContent className="p-12">
             <div className="text-center">
               <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 mb-2">No Orders Yet</h3>
-              <p className="text-gray-500 mb-6">You haven't placed any orders yet. Start by exploring our plans.</p>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                No Orders Yet
+              </h3>
+              <p className="text-gray-500 mb-6">
+                You haven't placed any orders yet. Start by exploring our plans.
+              </p>
               <Button>Browse Plans</Button>
             </div>
           </CardContent>
@@ -191,19 +224,24 @@ export default function OrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
-        <p className="text-muted-foreground">View and track all your subscription orders.</p>
+        <p className="text-muted-foreground">
+          View and track all your subscription orders.
+        </p>
       </div>
 
       <div className="space-y-4">
         {orders.map((order, index) => {
           const statusInfo = getStatusInfo(order);
           const daysRemaining = getDaysRemaining(order.subscriptionEnd);
-          const planName = order.plan || 'Subscription Plan';
-          const price = order.planDetails?.price || '0';
+          const planName = order.plan || "Subscription Plan";
+          const price = order.planDetails?.price || "0";
           const createdDate = order.createdAt || order.date;
 
           return (
-            <Card key={order._id || index} className="hover:shadow-md transition-shadow">
+            <Card
+              key={order._id || index}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -212,11 +250,14 @@ export default function OrdersPage() {
                     </CardTitle>
                     <CardDescription className="flex items-center space-x-4 mt-1">
                       <span>
-                        Ordered on {createdDate ? new Date(createdDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        }) : 'N/A'}
+                        Ordered on{" "}
+                        {createdDate
+                          ? new Date(createdDate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "N/A"}
                       </span>
                     </CardDescription>
                   </div>
@@ -228,7 +269,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="space-y-4">
                   {/* Subscription Period */}
@@ -241,36 +282,51 @@ export default function OrdersPage() {
                       <div className="grid gap-2 md:grid-cols-2">
                         {order.subscriptionStart && (
                           <div className="flex justify-between items-center p-2 bg-green-50 border border-green-200 rounded">
-                            <span className="text-sm font-medium text-green-800">Start Date</span>
+                            <span className="text-sm font-medium text-green-800">
+                              Start Date
+                            </span>
                             <span className="text-sm text-green-700">
-                              {new Date(order.subscriptionStart).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
+                              {new Date(
+                                order.subscriptionStart
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
                               })}
                             </span>
                           </div>
                         )}
                         {order.subscriptionEnd && (
                           <div className="flex justify-between items-center p-2 bg-red-50 border border-red-200 rounded">
-                            <span className="text-sm font-medium text-red-800">End Date</span>
+                            <span className="text-sm font-medium text-red-800">
+                              End Date
+                            </span>
                             <div className="text-right">
                               <div className="text-sm text-red-700">
-                                {new Date(order.subscriptionEnd).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric'
+                                {new Date(
+                                  order.subscriptionEnd
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
                                 })}
                               </div>
-                              {daysRemaining !== null && statusInfo.status === 'active' && (
-                                <div className={`text-xs ${
-                                  daysRemaining > 30 ? 'text-green-600' : 
-                                  daysRemaining > 7 ? 'text-orange-600' : 
-                                  'text-red-600'
-                                }`}>
-                                  {daysRemaining > 0 ? `${daysRemaining} days left` : 'Expired'}
-                                </div>
-                              )}
+                              {daysRemaining !== null &&
+                                statusInfo.status === "active" && (
+                                  <div
+                                    className={`text-xs ${
+                                      daysRemaining > 30
+                                        ? "text-green-600"
+                                        : daysRemaining > 7
+                                        ? "text-orange-600"
+                                        : "text-red-600"
+                                    }`}
+                                  >
+                                    {daysRemaining > 0
+                                      ? `${daysRemaining} days left`
+                                      : "Expired"}
+                                  </div>
+                                )}
                             </div>
                           </div>
                         )}
@@ -288,17 +344,21 @@ export default function OrdersPage() {
                       <div className="flex justify-between items-center p-2 bg-muted rounded">
                         <span className="text-sm">Billing Cycle</span>
                         <span className="text-sm font-medium capitalize">
-                          {order.planDetails?.billingCycle || 'Monthly'}
+                          {order.planDetails?.billingCycle || "Monthly"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-muted rounded">
                         <span className="text-sm">Payment Method</span>
-                        <span className="text-sm font-medium">{order.paymentMethod || 'N/A'}</span>
+                        <span className="text-sm font-medium">
+                          {order.paymentMethod || "N/A"}
+                        </span>
                       </div>
                       {order.utrNumber && (
                         <div className="flex justify-between items-center p-2 bg-muted rounded">
                           <span className="text-sm">UTR Number</span>
-                          <span className="text-sm font-mono font-medium">{order.utrNumber}</span>
+                          <span className="text-sm font-mono font-medium">
+                            {order.utrNumber}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -314,13 +374,16 @@ export default function OrdersPage() {
                       <div className="p-2 bg-muted rounded">
                         {order.mobileNumber && (
                           <div className="text-sm mb-1">
-                            <span className="font-medium">Mobile:</span> {order.mobileNumber}
+                            <span className="font-medium">Mobile:</span>{" "}
+                            {order.mobileNumber}
                           </div>
                         )}
                         {(order.address || order.city) && (
                           <div className="text-sm">
-                            <span className="font-medium">Address:</span> {order.address}
-                            {order.city && (order.address ? `, ${order.city}` : order.city)}
+                            <span className="font-medium">Address:</span>{" "}
+                            {order.address}
+                            {order.city &&
+                              (order.address ? `, ${order.city}` : order.city)}
                           </div>
                         )}
                       </div>
@@ -328,23 +391,30 @@ export default function OrdersPage() {
                   )}
 
                   {/* Features */}
-                  {order.planDetails?.features && order.planDetails.features.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Plan Features</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {order.planDetails.features.slice(0, 3).map((feature: string, idx: number) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {feature}
-                          </Badge>
-                        ))}
-                        {order.planDetails.features.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{order.planDetails.features.length - 3} more
-                          </Badge>
-                        )}
+                  {order.planDetails?.features &&
+                    order.planDetails.features.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Plan Features</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {order.planDetails.features
+                            .slice(0, 3)
+                            .map((feature: string, idx: number) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {feature}
+                              </Badge>
+                            ))}
+                          {order.planDetails.features.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{order.planDetails.features.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
@@ -356,7 +426,7 @@ export default function OrdersPage() {
                       <Download className="h-4 w-4 mr-2" />
                       Download Receipt
                     </Button>
-                    {statusInfo.status === 'active' && (
+                    {statusInfo.status === "active" && (
                       <Button variant="outline" size="sm">
                         <Package className="h-4 w-4 mr-2" />
                         Manage Plan

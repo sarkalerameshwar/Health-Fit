@@ -194,8 +194,8 @@ export function MealBoxesSection() {
               <p>If you'd like to place a demo order for this box, please contact us and we'll process it manually.</p>
 
               <div className="bg-muted/60 p-3 rounded-md">
-                <p className="text-sm">Call / WhatsApp: <a className="text-primary font-medium" href="tel:+911234567890">+91 12345 67890</a></p>
-                <p className="text-sm">Email: <a className="text-primary font-medium" href="mailto:demo@healthfit.example">demo@healthfit.example</a></p>
+                <p className="text-sm">Call / WhatsApp: <a className="text-primary font-medium" href="tel:+911234567890">+91 9226442954</a></p>
+                <p className="text-sm">Email: <a className="text-primary font-medium" href="mailto:healthfit189@gmail.com">healthfit189@gmail.com</a></p>
               </div>
 
               <p className="text-xs text-muted-foreground">When you contact us, mention the demo box name so we can prepare it for you.</p>

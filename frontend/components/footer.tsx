@@ -109,7 +109,7 @@ export function Footer() {
 
           {/* Technical Support */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Technical Support</h3>
+            <h3 className="text-lg font-semibold">Technical & Devloper Team</h3>
             <ul className="space-y-3 text-white">
               <li className="flex items-center space-x-2">
                 <User className="h-4 w-4" />
@@ -134,7 +134,7 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/20 text-center">
           <p className="text-white/80">
-            © 2024 HealthFit. All rights reserved. Made with ❤️ for healthy living.
+            © 2025 HealthFit. All rights reserved. Made with ❤️ for healthy living.
           </p>
         </div>
       </div>

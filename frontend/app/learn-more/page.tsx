@@ -294,9 +294,9 @@ export default function LearnMorePage() {
 
             <Card className="p-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-full w-12 h-12 bg-muted flex items-center justify-center">RS</div>
+                <div className="rounded-full w-12 h-12 bg-muted flex items-center justify-center">PP</div>
                 <div>
-                  <div className="font-semibold">Rameshwar Sarkale</div>
+                  <div className="font-semibold">Poonam Pandey</div>
                   <div className="text-xs text-muted-foreground">Verified subscriber</div>
                 </div>
               </div>
