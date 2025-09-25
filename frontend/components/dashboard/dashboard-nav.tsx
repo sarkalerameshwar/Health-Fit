@@ -11,11 +11,11 @@ const navItems = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    title: "My Subscription",
-    href: "/dashboard/subscription",
-    icon: Package,
-  },
+//  {
+//     title: "My Subscription",
+//     href: "/dashboard/subscription",
+//     icon: Package,
+//   }, 
   {
     title: "Order History",
     href: "/dashboard/orders",
