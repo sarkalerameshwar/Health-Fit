@@ -80,37 +80,7 @@ export default function FeedbackPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="orderNumber">Order Number (Optional)</Label>
-                  <Input
-                    id="orderNumber"
-                    placeholder="e.g., HF-2024-001234"
-                    value={formData.orderNumber}
-                    onChange={(e) => handleInputChange("orderNumber", e.target.value)}
-                  />
-                </div>
+              
 
                 <div className="space-y-3">
                   <Label>Overall Rating</Label>
