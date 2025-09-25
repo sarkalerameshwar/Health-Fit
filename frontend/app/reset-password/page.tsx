@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
 
   // Load email from localStorage on mount
   useEffect(() => {
-    const storedEmail = localStorage.getItem("userEmail");
+    const storedEmail = localStorage.getItem("useremail");
     if (storedEmail) {
       setEmail(storedEmail);
     }
@@ -34,7 +34,7 @@ export default function ResetPasswordPage() {
     setError("");
 
     // Get email from localStorage
-    const storedEmail = localStorage.getItem("userEmail");
+    const storedEmail = localStorage.getItem("useremail");
     if (!storedEmail) {
       setError("User email not found. Please log in again.");
       return;
@@ -64,6 +64,8 @@ export default function ResetPasswordPage() {
       });
 
       const data = await res.json();
+
+      const userId = data.id; // Get user ID from response
 
       if (!res.ok) throw new Error(data.message || "Failed to reset password");
 

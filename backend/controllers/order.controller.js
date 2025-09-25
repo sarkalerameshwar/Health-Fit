@@ -20,9 +20,6 @@ export const createOrder = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    console.log("Creating order for user:", userId);
-    console.log("Request body:", JSON.stringify(req.body, null, 2));
-
     const {
       plan,
       address,
@@ -43,7 +40,6 @@ export const createOrder = async (req, res) => {
       !paymentMethod ||
       !planDetails
     ) {
-      console.error("Missing required fields");
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -152,12 +148,6 @@ export const createOrder = async (req, res) => {
       subscriptionEnd = newEnd;
     }
 
-    console.log("Subscription dates:", {
-      start: finalSubscriptionStart.toISOString(),
-      end: subscriptionEnd.toISOString(),
-      durationDays: Math.round((subscriptionEnd - finalSubscriptionStart) / (1000 * 60 * 60 * 24))
-    });
-
     // Create new order
     const newOrder = new Order({
       userId,
@@ -177,7 +167,7 @@ export const createOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
-    console.log("Order created with 30-day subscription:", savedOrder._id);
+    // console.log("Order created with 30-day subscription:", savedOrder._id);
 
     // Handle payment method specific status
     if (paymentMethod === "Online") {
@@ -197,7 +187,7 @@ export const createOrder = async (req, res) => {
       order: savedOrder,
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    // console.error("Error creating order:", error);
     res.status(500).json({
       success: false,
       message: "Error creating order",
@@ -210,7 +200,7 @@ export const createOrder = async (req, res) => {
 export const checkAndUpdateExpiredSubscriptions = async () => {
   try {
     const currentDate = new Date();
-    console.log(`[${currentDate.toISOString()}] Checking for expired subscriptions...`);
+    // console.log(`[${currentDate.toISOString()}] Checking for expired subscriptions...`);
 
     // Find orders that should be expired
     const ordersToExpire = await Order.find({
@@ -219,7 +209,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
       isExpired: false
     });
 
-    console.log(`Found ${ordersToExpire.length} orders to expire`);
+    // console.log(`Found ${ordersToExpire.length} orders to expire`);
 
     if (ordersToExpire.length > 0) {
       const updateResult = await Order.updateMany(
@@ -235,12 +225,12 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
         }
       );
 
-      console.log(`Successfully expired ${updateResult.modifiedCount} orders`);
+      // console.log(`Successfully expired ${updateResult.modifiedCount} orders`);
       
       // Log the expired orders
-      ordersToExpire.forEach(order => {
-        console.log(`Order ${order._id} expired. Was valid until: ${order.subscriptionEnd}`);
-      });
+      // ordersToExpire.forEach(order => {
+      //   console.log(`Order ${order._id} expired. Was valid until: ${order.subscriptionEnd}`);
+      // });
     }
 
     return {

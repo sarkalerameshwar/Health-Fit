@@ -268,7 +268,7 @@ const verifyResetPasswordOtp = async (req, res) => {
     user.resetPasswordOtpExpiry = undefined;
     await user.save();
 
-    res.status(200).json({ message: 'Password reset successfully' });
+    res.status(200).json({ message: 'Password reset successfully', id:user._id });
   } catch (error) {
     console.error("Reset password error:", error);
     res.status(500).json({ message: 'Something went wrong' });

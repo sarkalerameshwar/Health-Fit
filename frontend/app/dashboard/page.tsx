@@ -8,6 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import Link from "next/link"; 
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle,
@@ -277,7 +278,9 @@ export default function UserDashboard() {
               <p className="text-gray-500 mb-8">
                 Get started by choosing a plan that works for you.
               </p>
-              <Button size="lg">Browse Plans</Button>
+              <Button asChild>
+                <Link href="/">Browse Plans</Link>
+              </Button>
             </div>
           ) : (
             <SubscriptionDetailsCard order={ordersList[0]} />
