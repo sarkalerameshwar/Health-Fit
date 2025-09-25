@@ -19,6 +19,7 @@ import {
   MapPin,
   AlertCircle,
 } from "lucide-react";
+import Link from "next/link"; // Import Link
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -38,7 +39,7 @@ export default function OrdersPage() {
         }
 
         const parsedUser = JSON.parse(storedUser);
-        const userId = parsedUser.userId; // <-- use userId, not _id or id
+        const userId = parsedUser.userId;
 
         const response = await fetch(
           `http://localhost:5000/api/orders/users/${userId}`,
@@ -55,7 +56,6 @@ export default function OrdersPage() {
           const data = await response.json();
           console.log("Orders data:", data);
 
-          // Extract orders from different response structures
           let ordersArray = [];
           if (Array.isArray(data)) {
             ordersArray = data;
@@ -73,7 +73,6 @@ export default function OrdersPage() {
             ordersArray = [data];
           }
 
-          // Sort orders by creation date (newest first)
           ordersArray.sort(
             (a, b) =>
               new Date(b.createdAt || b.date).getTime() -
@@ -100,7 +99,6 @@ export default function OrdersPage() {
     const endDate = order.subscriptionEnd;
     const now = new Date();
 
-    // Check if subscription is expired
     if (endDate && new Date(endDate) < now && status !== "cancelled") {
       return {
         status: "expired",
@@ -212,7 +210,10 @@ export default function OrdersPage() {
               <p className="text-gray-500 mb-6">
                 You haven't placed any orders yet. Start by exploring our plans.
               </p>
-              <Button>Browse Plans</Button>
+              {/* Fixed Browse Plans button with Link */}
+              <Button asChild>
+                <Link href="/">Browse Plans</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -272,7 +273,6 @@ export default function OrdersPage() {
 
               <CardContent>
                 <div className="space-y-4">
-                  {/* Subscription Period */}
                   {(order.subscriptionStart || order.subscriptionEnd) && (
                     <div>
                       <h4 className="font-semibold mb-2 flex items-center">
@@ -334,7 +334,6 @@ export default function OrdersPage() {
                     </div>
                   )}
 
-                  {/* Plan Details */}
                   <div>
                     <h4 className="font-semibold mb-2 flex items-center">
                       <CreditCard className="h-4 w-4 mr-2" />
@@ -364,7 +363,6 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Contact Information */}
                   {(order.address || order.city || order.mobileNumber) && (
                     <div>
                       <h4 className="font-semibold mb-2 flex items-center">
@@ -390,7 +388,6 @@ export default function OrdersPage() {
                     </div>
                   )}
 
-                  {/* Features */}
                   {order.planDetails?.features &&
                     order.planDetails.features.length > 0 && (
                       <div>
@@ -416,7 +413,6 @@ export default function OrdersPage() {
                       </div>
                     )}
 
-                  {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
                     <Button variant="outline" size="sm">
                       <Eye className="h-4 w-4 mr-2" />

@@ -20,9 +20,6 @@ export const createOrder = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    console.log("Creating order for user:", userId);
-    console.log("Request body:", JSON.stringify(req.body, null, 2));
-
     const {
       plan,
       address,
@@ -43,7 +40,6 @@ export const createOrder = async (req, res) => {
       !paymentMethod ||
       !planDetails
     ) {
-      console.error("Missing required fields");
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -152,12 +148,6 @@ export const createOrder = async (req, res) => {
       subscriptionEnd = newEnd;
     }
 
-    console.log("Subscription dates:", {
-      start: finalSubscriptionStart.toISOString(),
-      end: subscriptionEnd.toISOString(),
-      durationDays: Math.round((subscriptionEnd - finalSubscriptionStart) / (1000 * 60 * 60 * 24))
-    });
-
     // Create new order
     const newOrder = new Order({
       userId,
@@ -177,7 +167,7 @@ export const createOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
-    console.log("Order created with 30-day subscription:", savedOrder._id);
+    // console.log("Order created with 30-day subscription:", savedOrder._id);
 
     // Handle payment method specific status
     if (paymentMethod === "Online") {
@@ -197,7 +187,7 @@ export const createOrder = async (req, res) => {
       order: savedOrder,
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    // console.error("Error creating order:", error);
     res.status(500).json({
       success: false,
       message: "Error creating order",
@@ -210,7 +200,7 @@ export const createOrder = async (req, res) => {
 export const checkAndUpdateExpiredSubscriptions = async () => {
   try {
     const currentDate = new Date();
-    console.log(`[${currentDate.toISOString()}] Checking for expired subscriptions...`);
+    // console.log(`[${currentDate.toISOString()}] Checking for expired subscriptions...`);
 
     // Find orders that should be expired
     const ordersToExpire = await Order.find({
@@ -219,7 +209,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
       isExpired: false
     });
 
-    console.log(`Found ${ordersToExpire.length} orders to expire`);
+    // console.log(`Found ${ordersToExpire.length} orders to expire`);
 
     if (ordersToExpire.length > 0) {
       const updateResult = await Order.updateMany(
@@ -235,12 +225,12 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
         }
       );
 
-      console.log(`Successfully expired ${updateResult.modifiedCount} orders`);
+      // console.log(`Successfully expired ${updateResult.modifiedCount} orders`);
       
       // Log the expired orders
-      ordersToExpire.forEach(order => {
-        console.log(`Order ${order._id} expired. Was valid until: ${order.subscriptionEnd}`);
-      });
+      // ordersToExpire.forEach(order => {
+      //   console.log(`Order ${order._id} expired. Was valid until: ${order.subscriptionEnd}`);
+      // });
     }
 
     return {
@@ -249,7 +239,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
       message: `Expired ${ordersToExpire.length} subscriptions`
     };
   } catch (error) {
-    console.error("Error in expiry check:", error);
+    // console.error("Error in expiry check:", error);
     return {
       success: false,
       error: error.message
@@ -262,7 +252,7 @@ export const checkAndUpdateExpiredSubscriptions = async () => {
 export const manualExpiryCheck = async (req, res) => {
   try {
     const currentDate = new Date();
-    console.log(`Manual expiry check triggered at: ${currentDate.toISOString()}`);
+    // console.log(`Manual expiry check triggered at: ${currentDate.toISOString()}`);
     
     // Find orders that should be expired
     const ordersToExpire = await Order.find({
@@ -271,7 +261,7 @@ export const manualExpiryCheck = async (req, res) => {
       isExpired: false
     }).populate("userId", "name email");
 
-    console.log(`Found ${ordersToExpire.length} orders to expire`);
+    // console.log(`Found ${ordersToExpire.length} orders to expire`);
 
     let expiredOrders = [];
     
@@ -299,7 +289,7 @@ export const manualExpiryCheck = async (req, res) => {
           expiredAt: currentDate
         });
 
-        console.log(`Expired order ${order._id} for user ${updatedOrder.userId.name}`);
+        // console.log(`Expired order ${order._id} for user ${updatedOrder.userId.name}`);
       }
 
       return res.status(200).json({
@@ -346,7 +336,7 @@ export const manualExpiryCheck = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error in manual expiry check:", error);
+    // console.error("Error in manual expiry check:", error);
     res.status(500).json({
       success: false,
       message: "Error performing expiry check",
@@ -435,7 +425,7 @@ export const checkSubscriptionStatus = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking subscription status:", error);
+    // console.error("Error checking subscription status:", error);
     res.status(500).json({
       success: false,
       message: "Error checking subscription status",
@@ -476,7 +466,7 @@ export const getOrderById = async (req, res) => {
 
     res.status(200).json({ success: true, data: orderWithExpiryInfo });
   } catch (error) {
-    console.error("Error fetching order:", error);
+    // console.error("Error fetching order:", error);
     res.status(500).json({ success: false, message: "Error fetching order", error: error.message });
   }
 };
@@ -510,7 +500,7 @@ export const getOrders = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    // console.error("Error fetching orders:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching orders",
@@ -544,7 +534,7 @@ export const updateOrderStatus = async (req, res) => {
       data: updatedOrder,
     });
   } catch (error) {
-    console.error("Error updating order:", error);
+    // console.error("Error updating order:", error);
     res.status(500).json({ success: false, message: "Error updating order", error: error.message });
   }
 };
@@ -578,7 +568,7 @@ export const getOrdersByUserId = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching user orders:", error);
+    // console.error("Error fetching user orders:", error);
     res.status(500).json({ success: false, message: "Error fetching user orders", error: error.message });
   }
 };

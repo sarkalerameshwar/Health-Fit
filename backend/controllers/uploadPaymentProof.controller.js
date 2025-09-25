@@ -82,14 +82,8 @@ export const verifyPayment = async (req, res, next) => {
   try {
     const { orderId } = req.params;
 
-    console.log('🔍 verifyPayment called with:');
-    console.log('- orderId from params:', orderId);
-    console.log('- req.params:', req.params);
-    console.log('- req.body:', req.body);
-
     // ✅ Validate ObjectId format first
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      console.error('❌ Invalid orderId format:', orderId);
       return res.status(400).json({
         success: false,
         message: 'Invalid order ID format',
@@ -98,16 +92,12 @@ export const verifyPayment = async (req, res, next) => {
     }
 
     // ✅ Only check in Order collection
-    console.log('🔍 Searching for order in database...');
     const order = await Order.findById(orderId);
 
     if (!order) {
-      console.error('❌ Order not found in database:', orderId);
-      console.log('🔍 Available orders in database:');
 
       // Debug: List recent orders to help identify the issue
       const recentOrders = await Order.find({}).limit(5).select('_id status createdAt');
-      console.log('Recent orders:', recentOrders);
 
       return res.status(404).json({
         success: false,
@@ -117,21 +107,10 @@ export const verifyPayment = async (req, res, next) => {
       });
     }
 
-    console.log('✅ Order found:', {
-      id: order._id,
-      status: order.status,
-      userId: order.userId,
-      paymentVerified: order.paymentVerified
-    });
-
     // ✅ Mark payment verified (status update optional)
     order.paymentVerified = true;
     order.status = 'confirmed'; // you can remove this if you only want paymentVerified=true
     await order.save();
-
-    console.log(`✅ Payment verified for Order ID: ${orderId}`);
-    console.log(`📋 Order status updated to: ${order.status}`);
-    console.log(`🔄 Proceeding to send confirmation email...`);
 
     // Attach order to req for next middleware
     req.order = order;
@@ -140,7 +119,6 @@ export const verifyPayment = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error('Error verifying payment:', error);
     res.status(500).json({
       success: false,
       message: 'Error verifying payment',

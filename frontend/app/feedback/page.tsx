@@ -35,6 +35,7 @@ export default function FeedbackPage() {
 
     const token = localStorage.getItem("token");
     const userStr = localStorage.getItem("user");
+    const useremail = localStorage.getItem("useremail");
 
     if (!token || !userStr) {
       alert("Please log in first.");
@@ -44,7 +45,7 @@ export default function FeedbackPage() {
     const user = JSON.parse(userStr);
     const userId = user.userId || user._id;
     const username = user.username || user.name;
-    const email = user.email || user.useremail; // Support both keys
+    const email = user.email || useremail; // Support both keys
 
     if (!rating || !formData.category || !formData.feedback) {
       alert("Please fill in all required fields");

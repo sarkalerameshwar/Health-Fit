@@ -80,7 +80,7 @@ const OrderDetails = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/orders/${order._id}/status`,
+        `https://health-fit-uyi4.onrender.com/api/orders/${order._id}/status`,
         {
           method: "PUT",
           headers: {

@@ -120,7 +120,7 @@ This is an automated message, please do not reply to this email.`;
     });
 
   } catch (error) {
-    console.error('Subscription confirmation error:', error);
+    // console.error('Subscription confirmation error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to send subscription confirmation email',
@@ -151,7 +151,7 @@ const getAllSubscriptions = async (req, res) => {
     res.status(200).json(subscriptions);
   }
   catch (error) {
-    console.error('Error fetching subscriptions:', error);
+    // console.error('Error fetching subscriptions:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch subscriptions',

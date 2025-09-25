@@ -50,7 +50,7 @@ This is an automated message, please do not reply to this email.`
         );
         return res.status(200).json({ message: 'New OTP sent to your email. Please verify.' });
       } catch (emailError) {
-        console.error("Email sending failed:", emailError);
+        // console.error("Email sending failed:", emailError);
         return res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
       }
     }
@@ -96,11 +96,11 @@ This is an automated message, please do not reply to this email.`
       );
       res.status(201).json({ message: 'User registered. Please verify OTP sent to your email.' });
     } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+      // console.error("Email sending failed:", emailError);
       res.status(500).json({ message: 'User registered, but failed to send OTP email. Please try again.' });
     }
   } catch (error) {
-    console.error("Signup error:", error);
+    // console.error("Signup error:", error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -108,27 +108,27 @@ This is an automated message, please do not reply to this email.`
 
 const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  console.log("OTP Verification Attempt:", { email, receivedOtp: otp });
+  // console.log("OTP Verification Attempt:", { email, receivedOtp: otp });
   
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found for email:", email);
+      // console.log("User not found for email:", email);
       return res.status(404).json({ message: 'User not found' });
     }
 
 
     // Trim whitespace from the received OTP
     const trimmedOtp = otp.trim();
-    console.log("Trimmed OTP:", trimmedOtp);
+    // console.log("Trimmed OTP:", trimmedOtp);
 
     if (user.otp !== trimmedOtp) {
-      console.log("OTP mismatch - Stored:", user.otp, "Received (trimmed):", trimmedOtp);
+      // console.log("OTP mismatch - Stored:", user.otp, "Received (trimmed):", trimmedOtp);
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
     if (user.otpExpiry < Date.now()) {
-      console.log("OTP expired - Expiry:", user.otpExpiry, "Current:", Date.now());
+      // console.log("OTP expired - Expiry:", user.otpExpiry, "Current:", Date.now());
       return res.status(400).json({ message: 'OTP expired' });
     }
 
@@ -141,7 +141,7 @@ const verifyOtp = async (req, res) => {
 
     res.status(200).json({ message: 'OTP verified successfully', token, id:user._id });
   } catch (error) {
-    console.error("OTP verification error:", error);
+    // console.error("OTP verification error:", error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -227,11 +227,11 @@ This is an automated message, please do not reply to this email.`
       );
       res.status(200).json({ message: 'Password reset OTP sent to your email' });
     } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+      // console.error("Email sending failed:", emailError);
       res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
     }
   } catch (error) {
-    console.error("Forgot password error:", error);
+    // console.error("Forgot password error:", error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -268,9 +268,9 @@ const verifyResetPasswordOtp = async (req, res) => {
     user.resetPasswordOtpExpiry = undefined;
     await user.save();
 
-    res.status(200).json({ message: 'Password reset successfully' });
+    res.status(200).json({ message: 'Password reset successfully', id:user._id });
   } catch (error) {
-    console.error("Reset password error:", error);
+    // console.error("Reset password error:", error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -318,11 +318,11 @@ This is an automated message, please do not reply to this email.`
       );
       res.status(200).json({ message: 'New OTP sent to your email' });
     } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+      // console.error("Email sending failed:", emailError);
       res.status(500).json({ message: 'Failed to send OTP email. Please try again.' });
     }
   } catch (error) {
-    console.error("Resend OTP error:", error);
+    // console.error("Resend OTP error:", error);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -335,7 +335,7 @@ const getAllUsers = async (req, res) => {
       data: users
     });
   } catch (error) {
-    console.error("Get all users error:", error);
+    // console.error("Get all users error:", error);
     res.status(500).json({
       success: false,
       message: 'Something went wrong'
@@ -354,7 +354,7 @@ const getUserById = async (req, res) => {
     res.status(200).json({ user });
   } catch (error) {
 
-    console.error("Get user by ID error:", error);
+    // console.error("Get user by ID error:", error);
 
     res.status(500).json({ message: 'Something went wrong' });
   }

@@ -22,7 +22,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // CORS setup for multiple origins
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = ['http://localhost:3000', 'https://health-fit-736g.vercel.app'];
 
 const corsOptions = {
   origin: function (origin, callback) {
