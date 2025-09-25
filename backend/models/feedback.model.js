@@ -14,6 +14,11 @@ const feedbackSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  category: {
+    type: String,
+    enum: ["Product Quality", "Delivery Service", "Customer Service", "Website Experience", "Pricing", "Other"],
+    default: "Other"
+  },
   message: {
     type: String,
     required: true
