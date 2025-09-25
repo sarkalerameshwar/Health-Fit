@@ -21,20 +21,20 @@ const Dashboard = () => {
 
 
         // Fetch subscriptions
-        const subsRes = await fetch("http://localhost:5000/api/orders", {
+        const subsRes = await fetch("https://health-fit-uyi4.onrender.com/api/orders", {
           headers,
         });
         const subsData = await subsRes.json();
 
         // Fetch users
-        const usersRes = await fetch("http://localhost:5000/api/user/all", {
+        const usersRes = await fetch("https://health-fit-uyi4.onrender.com/api/user/all", {
           headers,
         });
         const usersData = await usersRes.json();
 
         // Fetch feedback
         const feedbackRes = await fetch(
-          "http://localhost:5000/api/feedback/all",
+          "https://health-fit-uyi4.onrender.com/api/feedback/all",
           { headers }
         );
         const feedbackData = await feedbackRes.json();

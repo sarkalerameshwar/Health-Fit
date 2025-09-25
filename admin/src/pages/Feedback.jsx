@@ -22,7 +22,7 @@ const Feedback = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/feedback/all", {
+      const response = await fetch("https://health-fit-uyi4.onrender.com/api/feedback/all", {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },
