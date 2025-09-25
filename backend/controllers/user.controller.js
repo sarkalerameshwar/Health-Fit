@@ -117,8 +117,6 @@ const verifyOtp = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log("Stored OTP:", user.otp, "OTP Expiry:", user.otpExpiry);
-    console.log("Current time:", Date.now());
 
     // Trim whitespace from the received OTP
     const trimmedOtp = otp.trim();
@@ -141,7 +139,7 @@ const verifyOtp = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.status(200).json({ message: 'OTP verified successfully', token });
+    res.status(200).json({ message: 'OTP verified successfully', token, id:user._id });
   } catch (error) {
     console.error("OTP verification error:", error);
     res.status(500).json({ message: 'Something went wrong' });

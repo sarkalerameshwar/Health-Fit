@@ -30,10 +30,13 @@ export default function VerifyEmailPage() {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    const pendingUser = localStorage.getItem("pendingUser");
-    if (pendingUser) {
-      const userData = JSON.parse(pendingUser);
-      setUserEmail(userData.email);
+    // Get user data from localStorage (stored after signup)
+    const userData = localStorage.getItem("user");
+    const useremail = localStorage.getItem("useremail");
+    
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUserEmail(user.userEmail || useremail || "");
     } else {
       router.push("/signup");
     }
@@ -61,15 +64,18 @@ export default function VerifyEmailPage() {
     setError("");
 
     try {
-      // Get current user email from localStorage (pendingUser stored after signup)
-      const pendingUser = localStorage.getItem("pendingUser");
-      if (!pendingUser) {
-        setError("No pending user found. Please signup again.");
+      // Get current user data from localStorage
+      const userData = localStorage.getItem("user");
+      const useremail = localStorage.getItem("useremail");
+      
+      if (!userData || !useremail) {
+        setError("No user data found. Please signup again.");
         setIsLoading(false);
         return;
       }
 
-      const { email } = JSON.parse(pendingUser);
+      const existingUser = JSON.parse(userData);
+      const email = existingUser.userEmail || useremail;
 
       // Send OTP verification request to backend
       const response = await fetch(
@@ -77,7 +83,7 @@ export default function VerifyEmailPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp: otp.trim() }), // trim whitespace
+          body: JSON.stringify({ email, otp: otp.trim() }),
         }
       );
 
@@ -89,18 +95,34 @@ export default function VerifyEmailPage() {
         return;
       }
 
+      console.log("OTP verification response:", data);
+
+      // ✅ Get the userId from backend response (data.id)
+      const userId = data.id;
+      
+      if (!userId) {
+        setError("User verification failed. No user ID received.");
+        setIsLoading(false);
+        return;
+      }
+
+      // ✅ Update user data with actual userId from backend and set isVerified = true
+      const updatedUser = {
+        username: existingUser.username,
+        userId: userId, // Actual userId from backend response
+        userEmail: existingUser.userEmail || email,
+        isVerified: true,
+      };
+
+      // ✅ Store updated user info in localStorage (same format as LoginForm)
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      localStorage.setItem("useremail", updatedUser.userEmail);
+      localStorage.setItem("isVerified", "true");
+
       // ✅ Store JWT from backend
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
-
-      // ✅ Optionally store verified user info
-      localStorage.setItem("user", JSON.stringify({ email, verified: true }));
-
-      // ✅ Clean up temporary OTP storage
-      localStorage.removeItem("pendingUser");
-      localStorage.removeItem("otp");
-      localStorage.removeItem("otpExpiry");
 
       setSuccess(true);
 
@@ -119,12 +141,24 @@ export default function VerifyEmailPage() {
     setError("");
 
     try {
+      // Get user email from localStorage
+      const userData = localStorage.getItem("user");
+      const useremail = localStorage.getItem("useremail");
+      
+      if (!userData || !useremail) {
+        setError("No user data found.");
+        return;
+      }
+
+      const user = JSON.parse(userData);
+      const email = user.userEmail || useremail;
+
       const response = await fetch(
         "http://localhost:5000/api/user/resend-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userEmail }),
+          body: JSON.stringify({ email }),
         }
       );
 

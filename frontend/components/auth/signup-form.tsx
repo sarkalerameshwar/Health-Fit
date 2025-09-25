@@ -2,6 +2,9 @@
 
 import type React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +18,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export function SignupForm() {
   const router = useRouter();
@@ -32,75 +33,92 @@ export function SignupForm() {
     agreeToTerms: false,
   });
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-  try {
-    // ✅ Check passwords match on frontend
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
+    try {
+      // Validate passwords
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match");
+        setIsLoading(false);
+        return;
+      }
 
-    if (!formData.agreeToTerms) {
-      setError("Please agree to the terms and conditions");
-      setIsLoading(false);
-      return;
-    }
+      if (!formData.agreeToTerms) {
+        setError("Please agree to the terms and conditions");
+        setIsLoading(false);
+        return;
+      }
 
-    // ✅ Only send what backend needs (exclude confirmPassword)
-    const payload = {
-      username: formData.name,
-      email: formData.email,
-      password: formData.password,
-    };
-
-    // ✅ Call signup API
-    const response = await fetch("http://localhost:5000/api/user/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    // ✅ Handle backend response
-    if (data.exists) {
-      // backend can return {exists:true, message:"User already exists"}
-      setError("User already exists. Please login instead.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!response.ok) {
-      setError(data.message || "Registration failed");
-      setIsLoading(false);
-      return;
-    }
-
-    // ✅ If user registered successfully → store pending user + redirect
-    localStorage.setItem(
-      "pendingUser",
-      JSON.stringify({
+      // Prepare payload (exclude confirmPassword)
+      const payload = {
+        username: formData.name,
         email: formData.email,
-        name: formData.name,
-      })
-    );
+        password: formData.password,
+      };
 
-    // ✅ Redirect to OTP verification page
-    router.push("/verify-email");
-  } catch (err) {
-    console.error(err);
-    setError("Registration failed. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Call signup API
+      const response = await fetch("http://localhost:5000/api/user/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      // Handle general backend errors
+      if (!response.ok) {
+        setError(data.message || "Registration failed");
+        setIsLoading(false);
+        return;
+      }
+      if (data.result) {
+        const minimalUser = {
+          username: data.result.username,
+          userId: data.result._id,
+          userEmail: data.result.email,
+        };
+        localStorage.setItem("user", JSON.stringify(minimalUser));
+        localStorage.setItem("useremail", data.result.email);
+        
+        // Store token if available
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+      } else {
+        // Fallback: Store basic info from form data for OTP verification
+        const minimalUser = {
+          username: formData.name,
+          userId: data.userId || "pending",
+          userEmail: formData.email,
+        };
+        localStorage.setItem("user", JSON.stringify(minimalUser));
+        localStorage.setItem("useremail", formData.email);
+      }
+
+      // Debug logging to see actual response structure
+      console.log("Signup response:", data);
+
+      // Store pending user info for OTP verification
+      const pendingUser = {
+        email: formData.email,
+        username: formData.name,
+      };
+      localStorage.setItem("pendingUser", JSON.stringify(pendingUser));
+
+      // Redirect to OTP verification
+      router.push("/verify-email");
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -196,7 +214,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                 variant="ghost"
                 size="sm"
                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
               >
                 {showConfirmPassword ? (
                   <EyeOff className="h-4 w-4" />
