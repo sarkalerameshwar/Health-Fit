@@ -235,9 +235,13 @@ function MealBoxCard({
         <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs sm:text-sm">Most Popular</Badge>
       )}
 
-      <div className="relative w-full sm:w-2/5 h-48 sm:h-auto">
-        <Image src={box.image} alt={box.name} fill className="object-cover" />
-      </div>
+      {/* FIXED: Removed h-48 and used aspect-[4/3] to maintain a better image ratio on mobile (w-full), 
+        preventing aggressive zooming/cropping. Reverts to default on sm:
+      */}
+      <div className="relative w-full h-40 sm:w-2/5 sm:h-auto sm:aspect-auto">
+  <Image src={box.image} alt={box.name} fill className="object-cover sm:object-cover" />
+</div>
+
 
       <div className="flex flex-col justify-between sm:w-3/5 p-6">
         <CardHeader className="text-center pb-4">

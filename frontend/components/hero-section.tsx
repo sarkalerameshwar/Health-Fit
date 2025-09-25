@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Leaf } from "lucide-react"
 import Link from "next/link"
 
-// Use plain <img> sources from /public
+// plain images from /public
 const DEFAULT_IMAGES = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg"]
 
 export function HeroSection({
@@ -33,20 +33,19 @@ export function HeroSection({
     return () => window.removeEventListener("resize", calc)
   }, [])
 
-  // simple infinite loop logic using clones (first N cloned to end)
   const N = slidesToShow
   const count = images.length
   const cloned = images.slice(0, N)
   const extended = [...images, ...cloned]
   const extendedCount = extended.length
+  const slidePct = 100 / slidesToShow
+  const translate = -(pos * slidePct)
 
-  // auto play
+  // autoplay
   useEffect(() => {
     if (!autoplay) return
     if (autoRef.current) window.clearInterval(autoRef.current)
-    autoRef.current = window.setInterval(() => {
-      setPos((p) => p + 1)
-    }, autoplayMs)
+    autoRef.current = window.setInterval(() => setPos((p) => p + 1), autoplayMs)
     return () => {
       if (autoRef.current) {
         window.clearInterval(autoRef.current)
@@ -55,72 +54,67 @@ export function HeroSection({
     }
   }, [autoplay, autoplayMs, slidesToShow])
 
-  // When pos hits clones region, snap back
+  // snap when hitting clones
   useEffect(() => {
     if (pos >= count) {
-      // after small delay (allow visible transition), reset to pos - count without transition
       const t = setTimeout(() => {
         if (!trackRef.current) return
-        // disable transition
+        // temporarily remove transition, snap to (pos - count)
         trackRef.current.style.transition = "none"
-        const slideWidth = 100 / slidesToShow
-        trackRef.current.style.transform = `translateX(${-(pos - count) * slideWidth}%)`
+        const snap = -(pos - count) * slidePct
+        trackRef.current.style.transform = `translateX(${snap}%)`
         // force reflow
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         trackRef.current.offsetHeight
-        // restore transition and set pos state
-        trackRef.current.style.transition = ""
+        // set pos to snapped value and restore transition
         setPos((p) => p - count)
-      }, 520) // match CSS transition ~500ms
+        trackRef.current.style.transition = ""
+      }, 520)
       return () => clearTimeout(t)
     }
-  }, [pos, count, slidesToShow])
+  }, [pos, count, slidePct])
 
-  // compute translate percent normally
-  const slideWidthPercent = 100 / slidesToShow
-  const translate = -(pos * slideWidthPercent)
-
-  // controls
   function next() {
     setPos((p) => p + 1)
-    resetAutoplay()
+    resetAuto()
   }
   function prev() {
-    // handle manual prev when at 0: jump to tail then move to last real
     if (pos === 0) {
-      if (!trackRef.current) { setPos((p) => (p - 1 + count) % count); return }
-      // snap to clone tail without transition
-      const snap = -(count * slideWidthPercent)
-      trackRef.current.style.transition = "none"
-      trackRef.current.style.transform = `translateX(${snap}%)`
-      // force reflow
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      trackRef.current.offsetHeight
-      trackRef.current.style.transition = ""
-      // then set to last real slide (with transition)
-      setTimeout(() => setPos(count - 1), 20)
-      resetAutoplay()
-      return
+      // snap to tail then go to last
+      if (trackRef.current) {
+        trackRef.current.style.transition = "none"
+        const snap = -count * slidePct
+        trackRef.current.style.transform = `translateX(${snap}%)`
+        // force reflow
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        trackRef.current.offsetHeight
+        trackRef.current.style.transition = ""
+        setTimeout(() => setPos(count - 1), 20)
+        resetAuto()
+        return
+      }
     }
-    setPos((p) => p - 1)
-    resetAutoplay()
+    setPos((p) => Math.max(0, p - 1))
+    resetAuto()
   }
   function goTo(i: number) {
     setPos(i)
-    resetAutoplay()
+    resetAuto()
   }
-  function resetAutoplay() {
+  function resetAuto() {
     if (!autoplay) return
     if (autoRef.current) window.clearInterval(autoRef.current)
-    autoRef.current = window.setInterval(() => {
-      setPos((p) => p + 1)
-    }, autoplayMs)
+    autoRef.current = window.setInterval(() => setPos((p) => p + 1), autoplayMs)
   }
+
+  // detect mobile to change styling if needed
+  const isMobile = slidesToShow === 1
 
   return (
     <section className="relative py-12 sm:py-20 lg:py-32 overflow-hidden">
       <div className="container px-4 md:px-6">
         <div className="grid gap-8 sm:gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+          {/* left content */}
           <div className="flex flex-col justify-center space-y-6 sm:space-y-4 text-center lg:text-left">
             <div className="space-y-4 sm:space-y-2">
               <h1 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-5xl xl:text-6xl/none text-balance">
@@ -131,6 +125,7 @@ export function HeroSection({
                 organic, and delivered right to your doorstep.
               </p>
             </div>
+
             <div className="flex flex-col gap-3 sm:gap-2 min-[400px]:flex-row justify-center lg:justify-start">
               <Link href="#meal-boxes-section" className="inline-flex">
                 <button className="inline-flex items-center gap-2 h-12 px-6 text-base rounded-md bg-primary text-primary-foreground hover:brightness-95">
@@ -145,17 +140,17 @@ export function HeroSection({
             </div>
           </div>
 
-          {/* Carousel */}
+          {/* carousel */}
           <div className="flex items-center justify-center order-first lg:order-last">
             <div className="relative w-full max-w-md lg:max-w-none">
               <div
                 className="relative overflow-hidden rounded-xl"
                 style={{
-                  aspectRatio: slidesToShow === 1 ? "16/9" : undefined,
+                  // stable height on mobile using viewport width -> 16:9: height = vw * 9/16
+                  height: isMobile ? `calc(100vw * 9 / 16)` : undefined,
                   touchAction: "pan-y",
                 }}
               >
-                {/* track */}
                 <div
                   ref={trackRef}
                   className="flex transition-transform duration-500 ease-in-out will-change-transform"
@@ -164,30 +159,29 @@ export function HeroSection({
                     transform: `translateX(${translate}%)`,
                   }}
                 >
-                  {extended.map((src, i) => (
+                  {extended.map((src, idx) => (
                     <div
-                      key={i}
+                      key={idx}
                       className="flex-shrink-0"
-                      style={{ width: `${slideWidthPercent}%`, padding: 8, boxSizing: "border-box" }}
+                      style={{ width: `${slidePct}%`, padding: 8, boxSizing: "border-box" }}
                     >
                       <div
                         className={`relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 h-full ${
-                          slidesToShow === 1 ? "aspect-video" : "aspect-[16/10]"
+                          isMobile ? "aspect-video" : "aspect-[16/10]"
                         }`}
                       >
-                        {/* plain <img> for predictable mobile behavior */}
                         <img
                           src={src}
-                          alt={`slide-${i}`}
+                          alt={`slide-${idx}`}
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: slidesToShow === 1 ? "contain" : "cover",
+                            objectFit: isMobile ? "contain" : "cover", // IMPORTANT: contain on mobile
                             objectPosition: "center",
                             display: "block",
                           }}
                           draggable={false}
-                          loading={i === 0 ? "eager" : "lazy"}
+                          loading={idx === 0 ? "eager" : "lazy"}
                         />
                       </div>
                     </div>
@@ -228,11 +222,16 @@ export function HeroSection({
         </div>
       </div>
 
+      {/* debug and mobile fixes */}
       <style jsx>{`
+        /* prevent image dragging */
         img {
           -webkit-user-drag: none;
           user-drag: none;
         }
+        /* Debug helpers (remove when done):
+           .carousel-slide { outline: 1px dashed rgba(255,255,255,0.08); }
+        */
       `}</style>
     </section>
   )
