@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
+import SplashWrapper from "@/components/SplashWrapper"   // ✅ import wrapper
 
 export const metadata: Metadata = {
   title: "HealthFit - Fresh Fruit Meal Boxes",
@@ -20,7 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en" nighteye="disabled">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+        {/* Splash runs on client only */}
+        <SplashWrapper />
+
+        {/* Main app content */}
         <Suspense fallback={null}>{children}</Suspense>
+
         <Analytics />
       </body>
     </html>
