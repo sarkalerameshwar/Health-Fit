@@ -12,7 +12,7 @@ const testimonials = [
     initials: "SJ",
   },
   {
-    name: "Prithviraj Jadhav",
+    name: "Pruthviraj Jadhav",
     avatar: "/prithvi.jpg",
     rating: 5,
     comment:

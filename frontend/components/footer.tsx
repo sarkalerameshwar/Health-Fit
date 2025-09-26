@@ -4,6 +4,14 @@ import Link from "next/link"
 import { Leaf, Facebook, Twitter, Instagram, Mail, Phone, User } from "lucide-react"
 
 export function Footer() {
+  // Social media links
+  const socialLinks = {
+    facebook: "https://www.facebook.com/yourpage",
+    twitter: "https://www.twitter.com/yourprofile",
+    instagram: "https://www.instagram.com/Healthfit_189",
+    email: "mailto:healthfit189@gmail.com"
+  }
+
   return (
     <footer className="bg-primary text-white">
       <div className="container px-4 md:px-6 py-12">
@@ -19,10 +27,40 @@ export function Footer() {
               Delivering fresh, organic fruits to support your healthy lifestyle journey.
             </p>
             <div className="flex space-x-4">
-              <Facebook className="h-5 w-5 hover:text-secondary cursor-pointer transition-colors" />
-              <Twitter className="h-5 w-5 hover:text-secondary cursor-pointer transition-colors" />
-              <Instagram className="h-5 w-5 hover:text-secondary cursor-pointer transition-colors" />
-              <Mail className="h-5 w-5 hover:text-secondary cursor-pointer transition-colors" />
+              <a 
+                href={socialLinks.facebook} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-secondary transition-colors"
+                aria-label="Visit our Facebook page"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a 
+                href={socialLinks.twitter} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-secondary transition-colors"
+                aria-label="Visit our Twitter profile"
+              >
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a 
+                href={socialLinks.instagram} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-secondary transition-colors"
+                aria-label="Visit our Instagram profile"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a 
+                href={socialLinks.email}
+                className="text-white hover:text-secondary transition-colors"
+                aria-label="Send us an email"
+              >
+                <Mail className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
@@ -109,7 +147,7 @@ export function Footer() {
 
           {/* Technical Support */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Technical & Devloper Team</h3>
+            <h3 className="text-lg font-semibold">Technical & Developer Team</h3>
             <ul className="space-y-3 text-white">
               <li className="flex items-center space-x-2">
                 <User className="h-4 w-4" />
@@ -123,7 +161,10 @@ export function Footer() {
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <a href="rameshwarsarkale21@gmail.com" className="text-white hover:text-secondary hover:underline transition-colors">
+                <a 
+                  href="mailto:rameshwarsarkale21@gmail.com" 
+                  className="text-white hover:text-secondary hover:underline transition-colors"
+                >
                   rameshwarsarkale21@gmail.com
                 </a>
               </li>
