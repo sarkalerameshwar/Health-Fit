@@ -66,7 +66,7 @@ export default function FeedbackPage() {
 
       console.log("Payload to send:", payload);
 
-      const res = await fetch("http://localhost:5000/api/feedback/add", {
+      const res = await fetch("https://health-fit-uyi4.onrender.com/api/feedback/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

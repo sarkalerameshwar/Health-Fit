@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/user/verify-reset-password-otp", {
+      const res = await fetch("https://health-fit-uyi4.onrender.com/api/user/verify-reset-password-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: storedEmail, otp, newPassword: password }),
