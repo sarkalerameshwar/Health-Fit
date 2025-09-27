@@ -108,7 +108,7 @@ This is an automated message, please do not reply to this email.`
 
 const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  // console.log("OTP Verification Attempt:", { email, receivedOtp: otp });
+  console.log("OTP Verification Attempt:", { email, receivedOtp: otp });
   
   try {
     const user = await User.findOne({ email });
