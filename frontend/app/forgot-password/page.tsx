@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const res = await fetch("https://health-fit-uyi4.onrender.com/api/user/forgot-password", {
+      const res = await fetch("https://healthfit-backend.onrender.com/api/user/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

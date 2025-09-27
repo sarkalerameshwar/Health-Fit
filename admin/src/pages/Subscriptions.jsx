@@ -11,7 +11,7 @@ const Subscriptions = () => {
       const token = localStorage.getItem("adminToken"); // get JWT token
       if (!token) throw new Error("No token found. Please login.");
 
-      const response = await fetch("https://health-fit-uyi4.onrender.com/api/orders", {
+      const response = await fetch("https://healthfit-backend.onrender.com/api/orders", {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },

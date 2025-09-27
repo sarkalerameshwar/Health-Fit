@@ -42,7 +42,7 @@ export default function OrdersPage() {
         const userId = parsedUser.userId;
 
         const response = await fetch(
-          `https://health-fit-uyi4.onrender.com/api/orders/users/${userId}`,
+          `https://healthfit-backend.onrender.com/api/orders/users/${userId}`,
           {
             method: "GET",
             headers: {

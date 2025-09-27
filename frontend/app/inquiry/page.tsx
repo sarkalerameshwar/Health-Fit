@@ -65,7 +65,7 @@ export default function InquiryPage() {
       message: formData.message,
     }
 
-    const res = await fetch("https://health-fit-uyi4.onrender.com/api/inquiries/add", {
+    const res = await fetch("https://healthfit-backend.onrender.com/api/inquiries/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

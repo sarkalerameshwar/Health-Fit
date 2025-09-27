@@ -79,7 +79,7 @@ export default function VerifyEmailPage() {
 
       // Send OTP verification request to backend
       const response = await fetch(
-        "https://health-fit-uyi4.onrender.com/api/user/verify-otp",
+        "https://healthfit-backend.onrender.com/api/user/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -154,7 +154,7 @@ export default function VerifyEmailPage() {
       const email = user.userEmail || useremail;
 
       const response = await fetch(
-        "https://health-fit-uyi4.onrender.com/api/user/resend-otp",
+        "https://healthfit-backend.onrender.com/api/user/resend-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

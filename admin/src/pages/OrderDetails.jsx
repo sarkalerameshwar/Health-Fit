@@ -27,7 +27,7 @@ const OrderDetails = () => {
 
     try {
       const response = await fetch(
-        `https://health-fit-uyi4.onrender.com/api/orders/${orderId}`,
+        `https://healthfit-backend.onrender.com/api/orders/${orderId}`,
         {
           method: "GET",
           headers: {

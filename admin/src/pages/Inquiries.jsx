@@ -51,7 +51,7 @@ const Inquiries = () => {
 
     try {
       const response = await fetch(
-        `https://health-fit-uyi4.onrender.com/api/inquiries/update-status/${inquiryId}`,
+        `https://healthfit-backend.onrender.com/api/inquiries/update-status/${inquiryId}`,
         {
           method: "PATCH",
           headers: {

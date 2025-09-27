@@ -22,7 +22,7 @@ const Feedback = () => {
     }
 
     try {
-      const response = await fetch("https://health-fit-uyi4.onrender.com/api/feedback/all", {
+      const response = await fetch("https://healthfit-backend.onrender.com/api/feedback/all", {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },

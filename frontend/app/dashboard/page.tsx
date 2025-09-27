@@ -85,7 +85,7 @@ export default function UserDashboard() {
 
         // Fetch orders
         const orderRes = await fetch(
-          `https://health-fit-uyi4.onrender.com/api/orders/users/${userId}`,
+          `https://healthfit-backend.onrender.com/api/orders/users/${userId}`,
           {
             method: "GET",
             headers: {
