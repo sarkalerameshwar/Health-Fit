@@ -12,7 +12,7 @@ const Users = () => {
         const token = localStorage.getItem("adminToken");
         if (!token) throw new Error("No token found. Please login.");
 
-        const response = await fetch("https://health-fit-uyi4.onrender.com/api/user/all", {
+        const response = await fetch("https://healthfit-backend.onrender.com/api/user/all", {
           headers: {
             authorization: token, // plain token, no 'Bearer ' prefix
           },

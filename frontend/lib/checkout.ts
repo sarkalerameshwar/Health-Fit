@@ -69,7 +69,7 @@ export interface OrderPayload {
 }
 
 const API_BASE_URL =
-  "https://health-fit-uyi4.onrender.com/api";
+  "https://healthfit-backend.onrender.com/api";
 
 /**
  * Create a new order (COD or UPI)
