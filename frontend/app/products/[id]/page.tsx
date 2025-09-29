@@ -183,7 +183,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow"
               title={fav ? "Remove favorite" : "Add to favorites"}
             >
-              {fav ? <HeartFill className="h-5 w-5 text-primary" /> : <Heart className="h-5 w-5 text-muted-foreground" />}
+              {fav ? <Heart className="h-5 w-5 text-primary" /> : <Heart className="h-5 w-5 text-muted-foreground" />}
             </button>
           </div>
 
