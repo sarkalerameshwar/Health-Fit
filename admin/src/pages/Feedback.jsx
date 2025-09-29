@@ -9,6 +9,7 @@ const Feedback = () => {
   const [filterRating, setFilterRating] = useState("All");
 
   const token = localStorage.getItem("adminToken");
+  const url = process.env.BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchFeedback();
@@ -22,7 +23,7 @@ const Feedback = () => {
     }
 
     try {
-      const response = await fetch("https://healthfit-backend.onrender.com/api/feedback/all", {
+      const response = await fetch(`${url}/api/feedback/all`, {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },

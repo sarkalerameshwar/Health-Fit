@@ -6,12 +6,14 @@ const Subscriptions = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("adminToken"); // get JWT token
       if (!token) throw new Error("No token found. Please login.");
 
-      const response = await fetch("https://healthfit-backend.onrender.com/api/orders", {
+      const response = await fetch(`${url}/api/orders`, {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },

@@ -10,6 +10,7 @@ const OrderDetails = () => {
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("adminToken");
+  const url = process.env.BASE_URL || "http://localhost:5000";
 
   // ✅ Fetch order details
   const fetchOrder = async () => {
@@ -27,7 +28,7 @@ const OrderDetails = () => {
 
     try {
       const response = await fetch(
-        `https://healthfit-backend.onrender.com/api/orders/${orderId}`,
+        `${url}/api/orders/${orderId}`,
         {
           method: "GET",
           headers: {
@@ -80,7 +81,7 @@ const OrderDetails = () => {
 
     try {
       const response = await fetch(
-        `https://health-fit-uyi4.onrender.com/api/orders/${order._id}/status`,
+        `${url}/api/orders/${order._id}/status`,
         {
           method: "PUT",
           headers: {

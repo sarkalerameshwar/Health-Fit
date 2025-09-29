@@ -8,12 +8,14 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await axios.post("https://healthfit-backend.onrender.com/api/admin/login", {
+      const res = await axios.post(`${url}/api/admin/login`, {
         username,
         password,
       });

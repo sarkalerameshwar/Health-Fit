@@ -6,13 +6,15 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("adminToken");
         if (!token) throw new Error("No token found. Please login.");
 
-        const response = await fetch("https://healthfit-backend.onrender.com/api/user/all", {
+        const response = await fetch(`${url}/api/user/all`, {
           headers: {
             authorization: token, // plain token, no 'Bearer ' prefix
           },

@@ -29,6 +29,8 @@ export default function VerifyEmailPage() {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [userEmail, setUserEmail] = useState("");
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     // Get user data from localStorage (stored after signup)
     const userData = localStorage.getItem("user");
@@ -79,7 +81,7 @@ export default function VerifyEmailPage() {
 
       // Send OTP verification request to backend
       const response = await fetch(
-        "https://healthfit-backend.onrender.com/api/user/verify-otp",
+        `${url}/api/user/verify-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -154,7 +156,7 @@ export default function VerifyEmailPage() {
       const email = user.userEmail || useremail;
 
       const response = await fetch(
-        "https://healthfit-backend.onrender.com/api/user/resend-otp",
+        `${url}/api/user/resend-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

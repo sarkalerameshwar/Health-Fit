@@ -26,6 +26,8 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -42,7 +44,7 @@ export default function OrdersPage() {
         const userId = parsedUser.userId;
 
         const response = await fetch(
-          `https://healthfit-backend.onrender.com/api/orders/users/${userId}`,
+          `${url}/api/orders/users/${userId}`,
           {
             method: "GET",
             headers: {

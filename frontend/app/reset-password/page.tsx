@@ -21,6 +21,8 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   // Load email from localStorage on mount
   useEffect(() => {
     const storedEmail = localStorage.getItem("useremail");
@@ -57,7 +59,7 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("https://healthfit-backend.onrender.com/api/user/verify-reset-password-otp", {
+      const res = await fetch(`${url}/api/user/verify-reset-password-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: storedEmail, otp, newPassword: password }),

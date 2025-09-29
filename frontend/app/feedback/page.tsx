@@ -26,6 +26,8 @@ export default function FeedbackPage() {
     feedback: "",
   });
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -66,7 +68,7 @@ export default function FeedbackPage() {
 
       console.log("Payload to send:", payload);
 
-      const res = await fetch("https://healthfit-backend.onrender.com/api/feedback/add", {
+      const res = await fetch(`${url}/api/feedback/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

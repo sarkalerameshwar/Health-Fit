@@ -35,6 +35,8 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,7 +60,7 @@ export default function UserDashboard() {
         }
 
         // Fetch user details
-        const userRes = await fetch(`https://health-fit-uyi4.onrender.com/api/user`, {
+        const userRes = await fetch(`${url}/api/user`, {
           method: "GET",
           headers: {
             Authorization: token,
@@ -85,7 +87,7 @@ export default function UserDashboard() {
 
         // Fetch orders
         const orderRes = await fetch(
-          `https://healthfit-backend.onrender.com/api/orders/users/${userId}`,
+          `${url}/api/orders/users/${userId}`,
           {
             method: "GET",
             headers: {

@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Download, Mail, Info, Clock, Phone } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE_URL = "https://healthfit-backend.onrender.com/api";
+const url = process.env.BASE_URL || "http://localhost:5000";
+const API_BASE_URL = `${url}/api`;
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
