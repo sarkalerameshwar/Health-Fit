@@ -96,17 +96,17 @@ function MealBoxCard({
 }) {
   return (
     <Card
-      className={`relative w-full max-w-2xl mx-auto flex flex-col sm:flex-row overflow-hidden rounded-xl
+      className={`relative w-full max-w-2xl mx-auto flex flex-col sm:flex-row overflow-visible rounded-xl
                   ${box.popular ? "border-primary shadow-lg" : ""}
                   hover:scale-[1.02] hover:shadow-xl transition-all duration-300 ease-in-out`}
     >
       {box.popular && (
-        <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs sm:text-sm">
+        <Badge className="absolute z-10 -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs sm:text-sm">
           Most Popular
         </Badge>
       )}
 
-      <div className="relative w-full h-48 sm:h-auto sm:w-2/5">
+      <div className="relative z-0 w-full h-48 sm:h-auto sm:w-2/5">
         <Image src={box.image} alt={box.name} fill className="object-cover" />
       </div>
 
