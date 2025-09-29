@@ -102,9 +102,6 @@ export function SignupForm() {
         localStorage.setItem("useremail", formData.email);
       }
 
-      // Debug logging to see actual response structure
-      console.log("Signup response:", data);
-
       // Store pending user info for OTP verification
       const pendingUser = {
         email: formData.email,

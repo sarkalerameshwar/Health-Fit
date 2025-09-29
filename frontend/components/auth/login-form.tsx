@@ -69,8 +69,6 @@ export function LoginForm() {
       if (data.token) {
         localStorage.setItem("token", data.token); // store JWT for auth
       }
-
-      console.log("Login successful:", data.result);
       router.push("/"); // redirect after login
     } catch (err) {
       console.error("Login error:", err);
