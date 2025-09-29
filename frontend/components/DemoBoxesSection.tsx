@@ -27,7 +27,7 @@ const demoBoxes = [
   {
     id: "demo-large",
     name: "Quick Demo Large",
-    price: "₹89",
+    price: "₹99",
     originalPrice: "₹119",
     period: "one-time",
     description: "Try a larger sample box",
@@ -106,6 +106,11 @@ export default function DemoBoxesSection() {
                 key={box.id}
                 className="mx-auto max-w-xs w-full rounded-2xl bg-white/90 border border-gray-100 shadow-sm hover:shadow-lg transition-transform transform hover:-translate-y-1"
               >
+                {box.popular && (
+        <Badge className="absolute z-10 -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs sm:text-sm">
+          Most Popular
+        </Badge>
+      )}
                 <CardContent className="flex flex-col items-center p-5">
                   <div className="relative w-28 h-28 mb-3">
                     <Image
@@ -119,7 +124,6 @@ export default function DemoBoxesSection() {
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2">
                       <CardTitle className="text-lg">{box.name}</CardTitle>
-                      {box.popular && <Badge className="bg-primary/10 text-primary">Popular</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{box.description}</p>
                   </div>

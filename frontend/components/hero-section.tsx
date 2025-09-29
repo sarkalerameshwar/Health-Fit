@@ -167,7 +167,7 @@ export function HeroSection({
               >
                 <span className="flex flex-col text-left leading-tight">
                   <span className="text-sm font-medium">Quick Demo</span>
-                  <span className="text-xs text-muted-foreground">One-time ₹50 / ₹80</span>
+                  <span className="text-xs text-muted-foreground">One-time ₹59 / ₹99</span>
                 </span>
                 <span className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground p-2">
                   <Zap className="h-4 w-4" />

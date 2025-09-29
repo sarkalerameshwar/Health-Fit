@@ -79,7 +79,7 @@ export function Footer() {
                 </Link>
               </li> */}
               <li>
-                <Link href="/subscription" className="text-white hover:text-secondary hover:underline transition-colors">
+                <Link href="/#meal-boxes-section" className="text-white hover:text-secondary hover:underline transition-colors">
                   Subscription Plans
                 </Link>
               </li>
