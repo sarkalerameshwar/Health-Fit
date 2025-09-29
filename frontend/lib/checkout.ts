@@ -127,7 +127,7 @@ export async function createOrder(orderPayload: OrderPayload) {
   console.log("Backend payment method:", backendPaymentMethod);
 
   // 1️⃣ Create Order
-  const response = await fetch(`${url}/orders/create`, {
+  const response = await fetch(`${url}/api/orders/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -210,7 +210,7 @@ export async function uploadPaymentProof(
 
   try {
     const response = await fetch(
-      `${url}/payments/upload-payment-proof`,
+      `${url}/api/payments/upload-payment-proof`,
       {
         method: "POST",
         headers: {
