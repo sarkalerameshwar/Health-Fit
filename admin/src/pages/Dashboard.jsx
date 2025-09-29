@@ -11,6 +11,8 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -21,20 +23,20 @@ const Dashboard = () => {
 
 
         // Fetch subscriptions
-        const subsRes = await fetch("https://health-fit-uyi4.onrender.com/api/orders", {
+        const subsRes = await fetch(`${url}/api/orders`, {
           headers,
         });
         const subsData = await subsRes.json();
 
         // Fetch users
-        const usersRes = await fetch("https://health-fit-uyi4.onrender.com/api/user/all", {
+        const usersRes = await fetch(`${url}/api/user/all`, {
           headers,
         });
         const usersData = await usersRes.json();
 
         // Fetch feedback
         const feedbackRes = await fetch(
-          "https://health-fit-uyi4.onrender.com/api/feedback/all",
+          `${url}/api/feedback/all`,
           { headers }
         );
         const feedbackData = await feedbackRes.json();

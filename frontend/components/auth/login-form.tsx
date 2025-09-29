@@ -28,13 +28,15 @@ export function LoginForm() {
     password: "",
   });
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch("https://health-fit-uyi4.onrender.com/api/user/login", {
+      const response = await fetch(`${url}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

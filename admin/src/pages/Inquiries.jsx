@@ -10,6 +10,7 @@ const Inquiries = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const token = localStorage.getItem("adminToken");
+  const url = process.env.BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchInquiries();
@@ -24,7 +25,7 @@ const Inquiries = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`https://health-fit-uyi4.onrender.com/api/inquiries/all`, {
+      const response = await fetch(`${url}/api/inquiries/all`, {
         headers: {
           authorization: token, // plain token, no 'Bearer ' prefix
         },
@@ -51,7 +52,7 @@ const Inquiries = () => {
 
     try {
       const response = await fetch(
-        `https://health-fit-uyi4.onrender.com/api/inquiries/update-status/${inquiryId}`,
+        `${url}/api/inquiries/update-status/${inquiryId}`,
         {
           method: "PATCH",
           headers: {

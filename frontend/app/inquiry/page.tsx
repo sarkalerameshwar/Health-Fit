@@ -22,6 +22,8 @@ export default function InquiryPage() {
     message: "",
   })
 
+  const url = process.env.BASE_URL || "http://localhost:5000"
+
   const [user, setUser] = useState<{ username: string; email: string } | null>(null)
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export default function InquiryPage() {
       message: formData.message,
     }
 
-    const res = await fetch("https://health-fit-uyi4.onrender.com/api/inquiries/add", {
+    const res = await fetch(`${url}/api/inquiries/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

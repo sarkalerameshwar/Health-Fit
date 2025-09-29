@@ -33,6 +33,8 @@ export function SignupForm() {
     agreeToTerms: false,
   });
 
+  const url = process.env.BASE_URL || "http://localhost:5000";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -60,7 +62,7 @@ export function SignupForm() {
       };
 
       // Call signup API
-      const response = await fetch("https://health-fit-uyi4.onrender.com/api/user/signup", {
+      const response = await fetch(`${url}/api/user/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
