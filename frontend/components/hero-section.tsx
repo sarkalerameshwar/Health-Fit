@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ArrowRight, Leaf } from "lucide-react"
+import { ArrowRight, Zap, Leaf } from "lucide-react"
+
 import Link from "next/link"
 import Image from "next/image" // Use Next.js Image component for better optimization
-import { TypingText } from './TypingText'; // Import the new component
+import { TypingText } from "./TypingText" // keep your typing component import
 
 // plain images from /public
 const DEFAULT_IMAGES = ["/fruit-im.jpg", "/fruit1.jpg", "/hero3.jpg"]
@@ -104,42 +105,78 @@ export function HeroSection({
 
   const isMobile = slidesToShow === 1
 
+  // Smooth scroll helpers for CTAs
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+      // small focus ring so it's visible
+      el.classList.add("ring-2", "ring-primary/40")
+      setTimeout(() => el.classList.remove("ring-2", "ring-primary/40"), 1400)
+    } else {
+      // fallback: anchor navigation
+      window.location.hash = id
+    }
+  }
+
   return (
     <section className="relative py-12 sm:py-20 lg:py-32 overflow-hidden">
       <div className="container px-4 md:px-6">
-        <div className="grid gap-8 sm:gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+        <div className="grid gap-8 sm:gap-6 lg:grid-cols-[1fr_420px] lg:gap-12 xl:grid-cols-[1fr_650px]">
           {/* left content */}
           <div className="flex flex-col justify-center space-y-6 sm:space-y-4 text-center lg:text-left">
             <div className="space-y-4 sm:space-y-2">
               <h1 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-5xl xl:text-6xl/none text-balance">
-  Healthy Living with{" "}
-  <TypingText
-    texts={["HealthFit", "Fresh Meals", "Organic Life"]} // 👈 you can add multiple phrases
-    className="text-primary"
-    speed={100}       // typing speed (lower = faster)
-    deleteSpeed={60}  // backspace speed
-    pause={1500}      // pause before deleting
-  />
+  Healthy Living with
+  <span className="block">
+    <TypingText
+      texts={["HealthFit", "Fresh Meals", "Organic Life"]}
+      className="text-primary"
+      speed={100}
+      deleteSpeed={60}
+      pause={1500}
+    />
+  </span>
 </h1>
+
 
               <p className="max-w-[700px] text-muted-foreground text-base sm:text-lg md:text-xl text-pretty mx-auto lg:mx-0">
                 Discover the perfect blend of nutrition and convenience with our customizable fruit meal boxes.
                 Each box is curated with fresh, organic, and delicious ingredients, designed to boost your energy
-                and simplify your healthy lifestyle. Delivered right to your doorstep, making healthy eating effortless.
+                and simplify your healthy lifestyle. Delivered right to your doorstep.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:gap-2 min-[400px]:flex-row justify-center lg:justify-start"> {/* 'justify-center' added for mobile */}
-              <Link href="#meal-boxes-section" className="inline-flex">
-                <button className="inline-flex items-center gap-2 h-12 px-6 text-base rounded-md bg-primary text-primary-foreground hover:brightness-95">
-                  Subscribe Now <ArrowRight className="h-4 w-4" />
-                </button>
-              </Link>
-              <Link href="/learn-more" className="inline-flex">
-                <button className="h-12 px-6 text-base rounded-md border border-primary/30 bg-transparent text-black/95 hover:brightness-95">
-                  Learn More
-                </button>
-              </Link>
+            {/* Creative CTA layout */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-center lg:justify-start">
+              {/* Primary: Subscribe - matches existing behaviour but uses smooth scroll helper */}
+              <button
+                onClick={() => scrollToSection("meal-boxes-section")}
+                className="inline-flex items-center gap-2 h-12 px-6 text-base rounded-md bg-primary text-primary-foreground hover:brightness-95 shadow-sm"
+                aria-label="Subscribe now - scroll to meal boxes"
+              >
+                Subscribe Now
+                <ArrowRight className="h-4 w-4" />
+              </button>
+
+              {/* Secondary: Quick Demo - visually distinct, includes small price hint */}
+              <button
+                onClick={() => scrollToSection("DemoBoxesSection")}
+                className="inline-flex items-center gap-3 h-12 px-4 text-base rounded-md border border-primary/20 bg-white/90 text-primary hover:bg-primary/5 shadow-sm"
+                aria-label="Quick Demo - scroll to quick demo boxes"
+              >
+                <span className="flex flex-col text-left leading-tight">
+                  <span className="text-sm font-medium">Quick Demo</span>
+                  <span className="text-xs text-muted-foreground">One-time ₹50 / ₹80</span>
+                </span>
+                <span className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground p-2">
+                  <Zap className="h-4 w-4" />
+                </span>
+              </button>
+
+              {/* Tertiary: Learn more - link to page */}
+             <Link href="/learn-more" className="inline-flex"> <button className="h-12 px-6 text-base rounded-md border border-primary/30 bg-transparent text-black/95 hover:brightness-95"> Learn More </button> </Link>
+
             </div>
           </div>
 
@@ -175,18 +212,17 @@ export function HeroSection({
                           maxHeight: "400px",
                         }}
                       >
-                        {/* Use Next.js Image component with proper sizing */}
-                        <Image // Changed img to Image
+                        <Image
                           src={src}
                           alt={`slide-${idx}`}
-                          fill // Use fill for Image component
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add responsive sizes
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           style={{
-                            objectFit: "contain", // Always use contain
+                            objectFit: "contain",
                             objectPosition: "center",
                           }}
                           draggable={false}
-                          priority={idx === 0} // Use priority instead of loading for first image
+                          priority={idx === 0}
                         />
                       </div>
                     </div>
@@ -214,6 +250,7 @@ export function HeroSection({
                       key={i}
                       onClick={() => goTo(i)}
                       className={`h-2 w-8 rounded-full transition-all ${i === (pos % count) ? "bg-primary" : "bg-white/40"}`}
+                      aria-label={`Go to slide ${i + 1}`}
                     />
                   ))}
                 </div>
