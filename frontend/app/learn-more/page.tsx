@@ -253,8 +253,9 @@ export default function LearnMorePage() {
 
               <div className="mt-6">
                 <Button asChild className="btn-primary">
-                  <Link href="#subscribe">Subscribe now</Link>
-                </Button>
+  <Link href="/#meal-boxes-section">Subscribe now</Link>
+</Button>
+
               </div>
             </div>
 
