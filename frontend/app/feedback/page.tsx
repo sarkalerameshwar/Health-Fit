@@ -26,7 +26,7 @@ export default function FeedbackPage() {
     feedback: "",
   });
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });

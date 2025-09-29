@@ -35,7 +35,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchData = async () => {

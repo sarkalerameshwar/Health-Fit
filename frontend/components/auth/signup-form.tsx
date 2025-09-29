@@ -33,7 +33,7 @@ export function SignupForm() {
     agreeToTerms: false,
   });
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

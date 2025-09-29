@@ -21,7 +21,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
 
   // Load email from localStorage on mount
   useEffect(() => {
