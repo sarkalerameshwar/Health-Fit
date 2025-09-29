@@ -6,7 +6,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const fetchUsers = async () => {

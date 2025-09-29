@@ -73,11 +73,11 @@ export function Footer() {
                   Home
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/offers" className="text-white hover:text-secondary hover:underline transition-colors">
                   Offers
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/subscription" className="text-white hover:text-secondary hover:underline transition-colors">
                   Subscription Plans
@@ -106,12 +106,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-white hover:text-secondary hover:underline transition-colors">
+                {/* <Link href="/faq" className="text-white hover:text-secondary hover:underline transition-colors">
                   FAQ
-                </Link>
+                </Link> */}
               </li>
               <li>
-                <Link href="/help" className="text-white hover:text-secondary hover:underline transition-colors">
+                <Link href="/inquiry" className="text-white hover:text-secondary hover:underline transition-colors">
                   Help Center
                 </Link>
               </li>
@@ -119,7 +119,7 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-lg font-semibold">Legal</h3>
             <ul className="space-y-2">
               <li>
@@ -143,7 +143,7 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Technical Support */}
           <div className="space-y-4">

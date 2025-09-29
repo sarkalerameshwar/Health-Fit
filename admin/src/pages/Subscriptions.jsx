@@ -6,7 +6,7 @@ const Subscriptions = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   const fetchOrders = async () => {
     try {

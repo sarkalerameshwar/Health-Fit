@@ -60,7 +60,6 @@ export function Header() {
 
   const navigationItems = [
     { href: "/", label: "Home" },
-    { href: "/offers", label: "Offers" },
     { href: "/products", label: "Products" },
     { href: "/inquiry", label: "Inquiry" },
     { href: "/feedback", label: "Feedback" },

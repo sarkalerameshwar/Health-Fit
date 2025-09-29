@@ -1,7 +1,6 @@
-// components/Header.jsx
 const Header = ({ title }) => {
   return (
-    <div className="bg-white shadow-sm p-4 flex justify-between items-center">
+    <div className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
       <h1 className="text-2xl font-bold text-dark">{title}</h1>
       <div className="flex items-center space-x-4">
         <button className="p-2 rounded-full bg-light hover:bg-gray-200">

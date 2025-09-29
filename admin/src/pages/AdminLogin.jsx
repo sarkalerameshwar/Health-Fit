@@ -8,7 +8,7 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -255,12 +255,12 @@ export default function CheckoutSuccessPage() {
             <Button asChild size="lg">
               <Link href="/dashboard">View Dashboard</Link>
             </Button>
-            {orderDetails && (
+            {/* {orderDetails && (
               <Button variant="outline" size="lg">
                 <Download className="mr-2 h-4 w-4" />
                 Download Receipt
               </Button>
-            )}
+            )} */}
             {!orderDetails && (
               <Button asChild variant="outline" size="lg">
                 <Link href="/plans">Browse Plans</Link>
@@ -269,7 +269,7 @@ export default function CheckoutSuccessPage() {
           </div>
 
           {/* Support Information */}
-          {orderDetails && (
+          {/* {orderDetails && (
             <div className="text-center text-sm text-muted-foreground">
               <p>
                 Need help? Contact our support team at{" "}
@@ -288,7 +288,7 @@ export default function CheckoutSuccessPage() {
                 </a>
               </p>
             </div>
-          )}
+          )} */}
         </div>
       </main>
       <Footer />

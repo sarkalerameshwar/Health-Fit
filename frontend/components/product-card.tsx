@@ -53,12 +53,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </CardContent>
-
-      <CardFooter className="p-4 pt-0">
-        <Button className="w-full" size="sm" variant="outline">
-          View
-        </Button>
-      </CardFooter>
     </Card>
   )
 }

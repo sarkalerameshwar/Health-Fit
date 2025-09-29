@@ -240,16 +240,6 @@ export default function VerifyEmailPage() {
             <span className="font-mono">{formatTime(timeLeft)}</span>
           </p>
 
-          <Button
-            variant="ghost"
-            onClick={handleResendOTP}
-            disabled={isResending || timeLeft === 0}
-            className="w-full text-sm"
-          >
-            {isResending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Resend OTP
-          </Button>
-
           <Button variant="ghost" asChild className="w-full">
             <Link
               href="/signup"

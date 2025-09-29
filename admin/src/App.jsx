@@ -24,7 +24,7 @@ function App() {
             <ProtectedRoute>
               <div className="flex h-screen bg-gray-100">
                 <Sidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 flex flex-col">
                   <Routes>
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                     <Route path="/dashboard" element={<Dashboard />} />

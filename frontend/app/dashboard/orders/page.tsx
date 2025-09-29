@@ -172,9 +172,9 @@ export default function OrdersPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Subscription History</h1>
           <p className="text-muted-foreground">
-            View and track all your subscription orders.
+            View and track all your subscription.
           </p>
         </div>
         <Card>
@@ -197,9 +197,9 @@ export default function OrdersPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Subscription History</h1>
           <p className="text-muted-foreground">
-            View and track all your subscription orders.
+            View and track all your subscription.
           </p>
         </div>
         <Card>
@@ -226,9 +226,9 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Subscription History</h1>
         <p className="text-muted-foreground">
-          View and track all your subscription orders.
+          View and track all your subscription.
         </p>
       </div>
 
@@ -415,7 +415,7 @@ export default function OrdersPage() {
                       </div>
                     )}
 
-                  <div className="flex gap-2 pt-2">
+                  {/* <div className="flex gap-2 pt-2">
                     <Button variant="outline" size="sm">
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
@@ -430,7 +430,7 @@ export default function OrdersPage() {
                         Manage Plan
                       </Button>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               </CardContent>
             </Card>

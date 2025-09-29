@@ -1,5 +1,4 @@
-// Sidebar.jsx
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -24,14 +23,16 @@ const Sidebar = () => {
       >
         Users
       </div>
-      {/* <div className="p-4 cursor-pointer hover:bg-gray-700" onClick={() => navigate("/inquiries")}>Inquiries</div> */}
       <div
         className="p-4 cursor-pointer hover:bg-gray-700"
         onClick={() => navigate("/feedback")}
       >
         Feedback
       </div>
-        <div className="p-4 cursor-pointer hover:bg-gray-700" onClick={() => navigate("/inquiries")}>
+      <div
+        className="p-4 cursor-pointer hover:bg-gray-700"
+        onClick={() => navigate("/inquiries")}
+      >
         Inquiries
       </div>
     </div>

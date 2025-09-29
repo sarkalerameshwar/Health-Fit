@@ -9,7 +9,7 @@ const Feedback = () => {
   const [filterRating, setFilterRating] = useState("All");
 
   const token = localStorage.getItem("adminToken");
-  const url = process.env.BASE_URL || "http://localhost:5000";
+  const url = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchFeedback();
