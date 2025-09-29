@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Download, Mail, Info, Clock, Phone } from "lucide-react";
 import Link from "next/link";
 
-const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
+const url = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
 const API_BASE_URL = `${url}/api`;
 
 export default function CheckoutSuccessPage() {

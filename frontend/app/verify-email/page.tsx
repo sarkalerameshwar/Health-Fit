@@ -29,7 +29,7 @@ export default function VerifyEmailPage() {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [userEmail, setUserEmail] = useState("");
 
-  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     // Get user data from localStorage (stored after signup)

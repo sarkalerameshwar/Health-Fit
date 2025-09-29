@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
+  const url = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

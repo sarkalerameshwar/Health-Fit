@@ -22,7 +22,7 @@ export default function InquiryPage() {
     message: "",
   })
 
-  const url = process.env.NEXT_BASE_URL || "http://localhost:5000"
+  const url = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000"
 
   const [user, setUser] = useState<{ username: string; email: string } | null>(null)
 

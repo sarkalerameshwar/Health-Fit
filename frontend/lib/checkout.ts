@@ -68,7 +68,7 @@ export interface OrderPayload {
   timestamp?: number;
 }
 
-const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
+const url = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000";
 
 /**
  * Create a new order (COD or UPI)
