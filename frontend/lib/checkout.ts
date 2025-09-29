@@ -69,7 +69,6 @@ export interface OrderPayload {
 }
 
 const url = process.env.NEXT_BASE_URL || "http://localhost:5000";
-const API_BASE_URL = `${url}/api`;
 
 /**
  * Create a new order (COD or UPI)
@@ -128,7 +127,7 @@ export async function createOrder(orderPayload: OrderPayload) {
   console.log("Backend payment method:", backendPaymentMethod);
 
   // 1️⃣ Create Order
-  const response = await fetch(`${API_BASE_URL}/orders/create`, {
+  const response = await fetch(`${url}/orders/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -211,7 +210,7 @@ export async function uploadPaymentProof(
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/payments/upload-payment-proof`,
+      `${url}/payments/upload-payment-proof`,
       {
         method: "POST",
         headers: {
